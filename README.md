@@ -88,7 +88,7 @@ import {Item} from 'module1'
 </Item>
 ```
 Селектор будет `Item > *:nth-child(1) > *.item:nth-child(1)`
-Что бы указать второй елемент в контейнере
+Что бы указать третий тег в контейнере
 ```html
 <Item>
   <ul>
@@ -154,12 +154,14 @@ import {Item} from 'module1'
 </div>
 ```
 
+
 ## @insert
 Добавляет тег в текущую позицию текущего контейнера
 ```html
 @export Item
 <div>
-  <span>Title</span>
+  <h1>Title</h1>
+  <p>Description</p>
   <button>Ok</button>
 </div>
 ```
@@ -168,7 +170,8 @@ import {Item} from 'module1'
 import {Item} from 'module1'
 
 <Item>
-  <span/>
+  <h1/>
+  <tag/>
   
   @insert
   <input type="text"/>
@@ -177,8 +180,101 @@ import {Item} from 'module1'
  =
 ```html
 <div>
-  <span>Title</span>
+  <h1>Title</h1>
+  <p>Description</p>
   <input type="text"/>
   <button>OK</button>
+</div>
+```
+
+## Добавление/переписывание атрибутов
+Что бы добавить или переписать атрибут перед ним нужно поставить `+`
+```html
+@export Item
+<div>
+  <h1 id="title">Title</h1>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1 +id="header" +title="Header"/>
+</Item>
+```
+ =
+```html
+<div>
+  <h1 id="header" title="Header">Title</h1>
+</div>
+```
+
+## Удаление атрибутов
+Что бы удалить атрибут перед ним нужно поставить `!`
+```html
+@export Item
+<div>
+  <h1 title="Header">Title</h1>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1 !title/>
+</Item>
+```
+ =
+```html
+<div>
+  <h1>Title</h1>
+</div>
+```
+
+## Добавление классов
+Что бы добавить класс перед ним нужно поставить `+`
+```html
+@export Item
+<div>
+  <h1 class="header">Title</h1>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1 class="+pull-left"/>
+</Item>
+```
+ =
+```html
+<div>
+  <h1 class="header pull-left">Title</h1>
+</div>
+```
+
+## Удаление классов
+Что бы удалить класс перед ним нужно поставить `!`
+```html
+@export Item
+<div>
+  <h1 class="header">Title</h1>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1 class="!header"/>
+</Item>
+```
+ =
+```html
+<div>
+  <h1 class="">Title</h1>
 </div>
 ```
