@@ -14,30 +14,35 @@
 
 
 ## @export
-Что бы экспортнуть тег достаточно перед ним написать анотацию `@export TagAlias` где TagAlias - имя тега когда его будут импортировать.
+Что бы экспортнуть тег достаточно перед ним написать анотацию `@export TagAlias` где `TagAlias` - имя тега когда его будут импортировать. Если `TagAlias` будет равен `default` то этот тег можно будет импортировать как дефолтный. Анотация `@export` может нахоиться на любом уровне вложенности.
 ```html
-@export ButtonXS
-<button class="btn btn-xs">OK</button>
+@export default
+<div>
+  @export ButtonXS
+  <button class="btn btn-xs">OK</button>
+</div>
 ```
 
 
 ## import
 Что бы импортнуть тег необходимо использовать слово `import` одним из следующих вариантов
 ```javascript
-import {TagAlias1, TagAlias2} from 'path/to/file'
-import * as Bootstrap from 'path/to/file'
+import {TagAlias1, TagAlias2 as Item} from 'path/to/file1'
+import * as Bootstrap from 'path/to/file2'
+import Layout from 'path/to/file3'
 ```
 а потом создавать тег обычным способом
 ```html
 <TagAlias1></TagAlias1>
-<TagAlias2/>
-<Bootstrap.Button/>
+<Item/>
+<Bootstrap.ButtonXS></Bootstrap.ButtonXS>
+<Layout/>
 ```
 Из-за того что `import` не относится к конкретному тегу, потому он не является анотацией, а ключевым словом.
 
 
 ## Указание пути к модифицируемому тегу
-Все теги, перед которыми нету анотаций, будут восприняты как путь.
+Все теги, перед которыми нету анотаций и которые находятся внутри импортированного тега, будут восприняты как путь.
 ```html
 @export Item
 <div>
@@ -101,6 +106,59 @@ import {Item} from 'module1'
 </Item>
 ```
 Селектор будет `Item > ul:nth-child(1) > *.first-item:nth-child(1) ~ li.second-item:nth-child(2) ~ *.item:nth-child(3)`
+
+
+## @find
+С помощью этой анотации можно указать путь к тегу через селектор. Использован будет первый попавшийся тег, а не все которые подходят под селектор. Теги с этой анотацией будут участвовать в построении пути только внутри себя, для соседей их существовать не будет, так как они не будут относиться к текущему контейнеру.
+```html
+@export Item
+<div>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Title</h1>
+    </div>
+    <div class="content">
+      <p>Description</p>
+    </div>
+  </div>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  @find .header
+  <tag>
+    @append
+    <span>Sub title</span>
+  </tag>
+  
+  <tag class="wrapper">
+    <tag/>
+    <tag class="content">
+      @append
+      <p>Text</p>
+    </tag>
+  </tag>
+</Item>
+```
+Путь к первому `@append` будет `Item .header`, ко второму `Item > *.wrapper:nth-child(1) > *:nth-child(1) ~ *.content:nth-child(2)`. 
+Результат:
+```html
+<div>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Title</h1>
+      <span>Sub title</span>
+    </div>
+    <div class="content">
+      <p>Description</p>
+      <p>Text</p>
+    </div>
+  </div>
+</div>
+```
 
 
 ## @append
