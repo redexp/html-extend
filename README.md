@@ -245,6 +245,73 @@ import {Item} from 'module1'
 </div>
 ```
 
+
+## @remove
+Удаляет текущий тег
+```html
+@export Item
+<div>
+  <div class="content">
+    <p>Description</p>
+  </div>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <tag class="content">
+    @remove
+    <p/>
+    
+    @insert
+    <h1>Title</h1>
+  </tag>
+</Item>
+```
+ =
+```html
+<div>
+  <div class="content">
+    <h1>Title</h1>
+  </div>
+</div>
+```
+
+
+## @empty
+Удаляет всё содержимое текущего тега.
+```html
+@export Item
+<div>
+  <div class="content">
+    <p>Description</p>
+  </div>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  @empty
+  <tag class="content">
+    @insert
+    <h1>Title</h1>
+  </tag>
+</Item>
+```
+ =
+```html
+<div>
+  <div class="content">
+    <h1>Title</h1>
+  </div>
+</div>
+```
+
+
 ## Добавление/переписывание атрибутов
 Что бы добавить или переписать атрибут перед ним нужно поставить `+`
 ```html
