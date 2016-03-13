@@ -403,3 +403,45 @@ import {Item} from 'module1'
   <h1 class="">Title</h1>
 </div>
 ```
+
+
+## Замена текста в теге
+Текст, перед которым нету анотации, будет заменять текущий текст в теге. На текст так же распостроняются правила построения пути.
+```html
+@export Item
+<div>
+  <h1><span class="icon"></span> Title</h1>
+  <h2>Title <span class="icon"></span></h2>
+  <h3><span class="icon"></span></h3>
+  <h4><span class="icon"></span></h4>
+  <h5></h5>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1><tag/> Main title</h1>
+  <tag>Sub title </tag>
+  <tag><tag/> Title</tag>
+  <tag>Title</tag>
+  <tag>
+    Title
+  
+    @insert
+    <span class="icon"></span>
+  </tag>
+</Item>
+```
+ =
+```html
+<div>
+  <h1><span class="icon"></span> Main title</h1>
+  <h2>Sub title <span class="icon"></span></h2>
+  <h3><span class="icon"></span> Title</h3>
+  <h4>Title<span class="icon"></span></h4>
+  <h5>Title <span class="icon"></span></h5>
+</div>
+```
+Удалить текст или заменить его на пробел нельзя, для этого необходимо обрамлять в исходном темплейте текст в тег, а в текущем темплейте использовать `@empty` или `@remove` перед этим тегом.
