@@ -86,7 +86,7 @@ import {Item} from 'module1'
 ```html
 <Item>
   <tag>
-    <tag class="item">
+    <tag>
     ...
     </tag>
   </tag>
@@ -97,15 +97,154 @@ import {Item} from 'module1'
 ```html
 <Item>
   <ul>
-    <tag class="first-item"/>
-    <li class="second-item"/>
-    <tag class="item">
+    <tag/>
+    <tag/>
+    <tag>
     ...
     </tag>
   </ul>
 </Item>
 ```
-Селектор будет `Item > ul:nth-child(1) > *.first-item:nth-child(1) ~ li.second-item:nth-child(2) ~ *.item:nth-child(3)`
+Селектор будет `Item > ul:nth-child(1) > *:nth-child(1) ~ *:nth-child(2) ~ *:nth-child(3)`
+
+
+## Добавление/переписывание атрибутов
+Любой указанный атрибут (кроме тега `class`) будет переписывать такой же родительский или если у родительского тега нету такого атрибута, то он добавиться
+```html
+@export Item
+<div>
+  <h1 id="title">Title</h1>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <tag id="header" title="Header"/>
+</Item>
+```
+ =
+```html
+<div>
+  <h1 id="header" title="Header">Title</h1>
+</div>
+```
+
+## Удаление атрибутов
+Что бы удалить атрибут перед ним нужно поставить `!`
+```html
+@export Item
+<div>
+  <h1 title="Header">Title</h1>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1 !title/>
+</Item>
+```
+ =
+```html
+<div>
+  <h1>Title</h1>
+</div>
+```
+
+## Добавление классов
+Любой указаный класс будет добавлен к текущему тегу
+```html
+@export Item
+<div>
+  <h1 class="header">Title</h1>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1 class="pull-left"/>
+</Item>
+```
+ =
+```html
+<div>
+  <h1 class="header pull-left">Title</h1>
+</div>
+```
+
+## Удаление классов
+Что бы удалить класс перед ним нужно поставить `!`
+```html
+@export Item
+<div>
+  <h1 class="header">Title</h1>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1 class="!header"/>
+</Item>
+```
+ =
+```html
+<div>
+  <h1 class="">Title</h1>
+</div>
+```
+
+
+## Замена текста в теге
+Текст, перед которым нету анотации, будет заменять текущий текст в теге. На текст так же распостроняются правила построения пути.
+```html
+@export Item
+<div>
+  <h1><span class="icon"></span> Title</h1>
+  <h2>Title <span class="icon"></span></h2>
+  <h3><span class="icon"></span></h3>
+  <h4><span class="icon"></span></h4>
+  <h5></h5>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1><tag/> Main title</h1>
+  <tag>Sub title </tag>
+  <tag><tag/> Title</tag>
+  <tag>Title</tag>
+  <tag>
+    Title
+    <span class="icon"></span>
+  </tag>
+</Item>
+```
+ =
+```html
+<div>
+  <h1><span class="icon"></span> Main title</h1>
+  <h2>Sub title <span class="icon"></span></h2>
+  <h3><span class="icon"></span> Title</h3>
+  <h4>Title<span class="icon"></span></h4>
+  <h5>
+    Title
+    <span class="icon"></span>
+  </h5>
+</div>
+```
+
+
+## Удаление текста
+Удалить текст можно добавив символ мнемонику `&nbsp;` или если вообще без пробелов то можно `&ZeroWidthSpace;` или любой другой непечатаемы символ.
 
 
 ## @find
@@ -310,138 +449,3 @@ import {Item} from 'module1'
   </div>
 </div>
 ```
-
-
-## Добавление/переписывание атрибутов
-Что бы добавить или переписать атрибут перед ним нужно поставить `+`
-```html
-@export Item
-<div>
-  <h1 id="title">Title</h1>
-</div>
-```
-+
-```html
-import {Item} from 'module1'
-
-<Item>
-  <h1 +id="header" +title="Header"/>
-</Item>
-```
- =
-```html
-<div>
-  <h1 id="header" title="Header">Title</h1>
-</div>
-```
-
-## Удаление атрибутов
-Что бы удалить атрибут перед ним нужно поставить `!`
-```html
-@export Item
-<div>
-  <h1 title="Header">Title</h1>
-</div>
-```
-+
-```html
-import {Item} from 'module1'
-
-<Item>
-  <h1 !title/>
-</Item>
-```
- =
-```html
-<div>
-  <h1>Title</h1>
-</div>
-```
-
-## Добавление классов
-Что бы добавить класс перед ним нужно поставить `+`
-```html
-@export Item
-<div>
-  <h1 class="header">Title</h1>
-</div>
-```
-+
-```html
-import {Item} from 'module1'
-
-<Item>
-  <h1 class="+pull-left"/>
-</Item>
-```
- =
-```html
-<div>
-  <h1 class="header pull-left">Title</h1>
-</div>
-```
-
-## Удаление классов
-Что бы удалить класс перед ним нужно поставить `!`
-```html
-@export Item
-<div>
-  <h1 class="header">Title</h1>
-</div>
-```
-+
-```html
-import {Item} from 'module1'
-
-<Item>
-  <h1 class="!header"/>
-</Item>
-```
- =
-```html
-<div>
-  <h1 class="">Title</h1>
-</div>
-```
-
-
-## Замена текста в теге
-Текст, перед которым нету анотации, будет заменять текущий текст в теге. На текст так же распостроняются правила построения пути.
-```html
-@export Item
-<div>
-  <h1><span class="icon"></span> Title</h1>
-  <h2>Title <span class="icon"></span></h2>
-  <h3><span class="icon"></span></h3>
-  <h4><span class="icon"></span></h4>
-  <h5></h5>
-</div>
-```
-+
-```html
-import {Item} from 'module1'
-
-<Item>
-  <h1><tag/> Main title</h1>
-  <tag>Sub title </tag>
-  <tag><tag/> Title</tag>
-  <tag>Title</tag>
-  <tag>
-    Title
-  
-    @insert
-    <span class="icon"></span>
-  </tag>
-</Item>
-```
- =
-```html
-<div>
-  <h1><span class="icon"></span> Main title</h1>
-  <h2>Sub title <span class="icon"></span></h2>
-  <h3><span class="icon"></span> Title</h3>
-  <h4>Title<span class="icon"></span></h4>
-  <h5>Title <span class="icon"></span></h5>
-</div>
-```
-Удалить текст или заменить его на пробел нельзя, для этого необходимо обрамлять в исходном темплейте текст в тег, а в текущем темплейте использовать `@empty` или `@remove` перед этим тегом.
