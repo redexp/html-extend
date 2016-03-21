@@ -107,6 +107,74 @@ import {Item} from 'module1'
 ```
 Селектор будет `Item > ul:nth-child(1) > *:nth-child(1) ~ *:nth-child(2) ~ *:nth-child(3)`
 
+## Добавление тегов
+Если в родительском контейнере два тега, а в текущем три, то третий будет будет добавлен
+```html
+@export Item
+<div>
+  <ul class="list">
+    <li class="item"></li>
+  </ul>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <tag>
+    <tag/>
+    <li class="second-item"></li>
+  </tag>
+</Item>
+```
+ =
+```html
+@export Item
+<div>
+  <ul class="list">
+    <li class="item"></li>
+    <li class="second-item"></li>
+  </ul>
+</div>
+```
+Что бы добавить без указания точного пути к нему есть аннотации: @prepend, @append, @insert, @find
+
+
+## Удаление тегов
+Для этого надо использовать аннотацию @remove
+
+
+## Переименование тегов
+Указав путь к тегу, можно просто написать другое имя
+```html
+@export Item
+<div>
+  <ul class="list">
+    <li class="item"></li>
+  </ul>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <tag>
+    <div/>
+  </tag>
+</Item>
+```
+ =
+```html
+@export Item
+<div>
+  <ul class="list">
+    <div class="item"></li>
+  </ul>
+</div>
+```
+
 
 ## Добавление/переписывание атрибутов
 Любой указанный атрибут (кроме тега `class`) будет переписывать такой же родительский или если у родительского тега нету такого атрибута, то он добавиться
@@ -301,7 +369,7 @@ import {Item} from 'module1'
 
 
 ## @append
-Добавляет тег в конец текущего контейнера
+Добавляет тег в конец текущего контейнера. Добавленный тег будет учавствовать в построении пути, все указанные после него теги так же будут добавленны в конец.
 ```html
 @export Item
 <div>
@@ -315,19 +383,25 @@ import {Item} from 'module1'
 <Item>
   @append
   <button>OK</button>
+  
+  <button>Cancel</button>
 </Item>
 ```
+Кнопка `OK` будет добавлена в конец и путь к ней будет `Item > *:nth-child(2)`, соответсвенно кнопку `Cancel` нужно вставить после неё, т.е. третей в контейнере
  =
 ```html
 <div>
   <span>Title</span>
+  
   <button>OK</button>
+  
+  <button>Cancel</button>
 </div>
 ```
 
 
 ## @prepend
-Добавляет тег в начало текущего контейнера
+Добавляет тег в начало текущего контейнера. Добавленный тег будет учавствовать в построении пути.
 ```html
 @export Item
 <div>
@@ -341,19 +415,22 @@ import {Item} from 'module1'
 <Item>
   @prepend
   <button>OK</button>
+  
+  <span class="header"/>
 </Item>
 ```
  =
 ```html
 <div>
   <button>OK</button>
-  <span>Title</span>
+  
+  <span class="header">Title</span>
 </div>
 ```
 
 
 ## @insert
-Добавляет тег в текущую позицию текущего контейнера
+Добавляет тег в текущую позицию текущего контейнера. Добавленный тег будет учавствовать в построении пути.
 ```html
 @export Item
 <div>
@@ -372,6 +449,8 @@ import {Item} from 'module1'
   
   @insert
   <input type="text"/>
+  
+  <button type="submit"/>
 </Item>
 ```
  =
@@ -380,18 +459,19 @@ import {Item} from 'module1'
   <h1>Title</h1>
   <p>Description</p>
   <input type="text"/>
-  <button>OK</button>
+  <button type="submit">OK</button>
 </div>
 ```
 
 
 ## @remove
-Удаляет текущий тег
+Удаляет текущий тег.
 ```html
 @export Item
 <div>
   <div class="content">
-    <p>Description</p>
+    <input type="text"/>
+    <button>OK</button>
   </div>
 </div>
 ```
@@ -402,10 +482,9 @@ import {Item} from 'module1'
 <Item>
   <tag class="content">
     @remove
-    <p/>
+    <input/>
     
-    @insert
-    <h1>Title</h1>
+    <button type="submit"/>
   </tag>
 </Item>
 ```
@@ -413,7 +492,7 @@ import {Item} from 'module1'
 ```html
 <div>
   <div class="content">
-    <h1>Title</h1>
+    <button type="submit">OK</button>
   </div>
 </div>
 ```
@@ -426,6 +505,7 @@ import {Item} from 'module1'
 <div>
   <div class="content">
     <p>Description</p>
+    <button>OK</button>
   </div>
 </div>
 ```
@@ -436,7 +516,6 @@ import {Item} from 'module1'
 <Item>
   @empty
   <tag class="content">
-    @insert
     <h1>Title</h1>
   </tag>
 </Item>
