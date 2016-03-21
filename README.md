@@ -69,7 +69,7 @@ import {Item} from 'module1'
   </ul>
 </Item>
 ```
-Этот путь можно представить в виде селектора `Item > ul:nth-child(1) > li:nth-child(1)`
+Этот путь можно представить в виде селектора `Item > *:nth-child(1) > *:nth-child(1)`
 Результат:
 ```html
 <div>
@@ -92,7 +92,7 @@ import {Item} from 'module1'
   </tag>
 </Item>
 ```
-Селектор будет `Item > *:nth-child(1) > *.item:nth-child(1)`
+Селектор будет `Item > *:nth-child(1) > *:nth-child(1)`
 Что бы указать третий тег в контейнере
 ```html
 <Item>
@@ -105,7 +105,7 @@ import {Item} from 'module1'
   </ul>
 </Item>
 ```
-Селектор будет `Item > ul:nth-child(1) > *:nth-child(1) ~ *:nth-child(2) ~ *:nth-child(3)`
+Селектор будет `Item > *:nth-child(1) > *:nth-child(3)`
 
 ## Добавление тегов
 Если в родительском контейнере два тега, а в текущем три, то третий будет будет добавлен
@@ -138,7 +138,7 @@ import {Item} from 'module1'
   </ul>
 </div>
 ```
-Что бы добавить без указания точного пути к нему есть аннотации: @prepend, @append, @insert, @find
+Что бы добавить тег, без указания точного пути, есть аннотации: @prepend, @append, @insert
 
 
 ## Удаление тегов
