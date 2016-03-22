@@ -350,7 +350,7 @@ import {Item} from 'module1'
   </tag>
 </Item>
 ```
-Путь к первому `@append` будет `Item .header`, ко второму `Item > *.wrapper:nth-child(1) > *:nth-child(1) ~ *.content:nth-child(2)`. 
+Путь к первому `@append` будет `Item .header`, ко второму `Item > *:nth-child(1) > *:nth-child(2)`. 
 Результат:
 ```html
 <div>
