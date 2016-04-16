@@ -69,7 +69,7 @@ import {Item} from 'module1'
   </ul>
 </Item>
 ```
-Этот путь можно представить в виде селектора `Item > ul:nth-child(1) > li:nth-child(1)`
+Этот путь можно представить в виде селектора `Item > *:nth-child(1) > *:nth-child(1)`
 Результат:
 ```html
 <div>
@@ -86,41 +86,35 @@ import {Item} from 'module1'
 ```html
 <Item>
   <tag>
-    <tag class="item">
+    <tag>
     ...
     </tag>
   </tag>
 </Item>
 ```
-Селектор будет `Item > *:nth-child(1) > *.item:nth-child(1)`
+Селектор будет `Item > *:nth-child(1) > *:nth-child(1)`
 Что бы указать третий тег в контейнере
 ```html
 <Item>
   <ul>
-    <tag class="first-item"/>
-    <li class="second-item"/>
-    <tag class="item">
+    <tag/>
+    <tag/>
+    <tag>
     ...
     </tag>
   </ul>
 </Item>
 ```
-Селектор будет `Item > ul:nth-child(1) > *.first-item:nth-child(1) ~ li.second-item:nth-child(2) ~ *.item:nth-child(3)`
+Селектор будет `Item > *:nth-child(1) > *:nth-child(3)`
 
-
-## @find
-С помощью этой анотации можно указать путь к тегу через селектор. Теги с этой анотацией будут участвовать в построении пути только внутри себя, для соседей их существовать не будет, так как они не будут относиться к текущему контейнеру.
+## Добавление тегов
+Если в родительском контейнере один тег, а в текущем два, то второй будет будет добавлен
 ```html
 @export Item
 <div>
-  <div class="wrapper">
-    <div class="header">
-      <h1>Title</h1>
-    </div>
-    <div class="content">
-      <p>Description</p>
-    </div>
-  </div>
+  <ul class="list">
+    <li class="item"></li>
+  </ul>
 </div>
 ```
 +
@@ -128,166 +122,37 @@ import {Item} from 'module1'
 import {Item} from 'module1'
 
 <Item>
-  @find .header
   <tag>
-    @append
-    <span>Sub title</span>
-  </tag>
-  
-  <tag class="wrapper">
     <tag/>
-    <tag class="content">
-      @append
-      <p>Text</p>
-    </tag>
-  </tag>
-</Item>
-```
-Путь к первому `@append` будет `Item .header`, ко второму `Item > *.wrapper:nth-child(1) > *:nth-child(1) ~ *.content:nth-child(2)`. 
-Результат:
-```html
-<div>
-  <div class="wrapper">
-    <div class="header">
-      <h1>Title</h1>
-      <span>Sub title</span>
-    </div>
-    <div class="content">
-      <p>Description</p>
-      <p>Text</p>
-    </div>
-  </div>
-</div>
-```
-
-
-## @append
-Добавляет тег в конец текущего контейнера
-```html
-@export Item
-<div>
-  <span>Title</span>
-</div>
-```
-+
-```html
-import {Item} from 'module1'
-
-<Item>
-  @append
-  <button>OK</button>
-</Item>
-```
- =
-```html
-<div>
-  <span>Title</span>
-  <button>OK</button>
-</div>
-```
-
-
-## @prepend
-Добавляет тег в начало текущего контейнера
-```html
-@export Item
-<div>
-  <span>Title</span>
-</div>
-```
-+
-```html
-import {Item} from 'module1'
-
-<Item>
-  @prepend
-  <button>OK</button>
-</Item>
-```
- =
-```html
-<div>
-  <button>OK</button>
-  <span>Title</span>
-</div>
-```
-
-
-## @insert
-Добавляет тег в текущую позицию текущего контейнера
-```html
-@export Item
-<div>
-  <h1>Title</h1>
-  <p>Description</p>
-  <button>Ok</button>
-</div>
-```
-+
-```html
-import {Item} from 'module1'
-
-<Item>
-  <h1/>
-  <tag/>
-  
-  @insert
-  <input type="text"/>
-</Item>
-```
- =
-```html
-<div>
-  <h1>Title</h1>
-  <p>Description</p>
-  <input type="text"/>
-  <button>OK</button>
-</div>
-```
-
-
-## @remove
-Удаляет текущий тег
-```html
-@export Item
-<div>
-  <div class="content">
-    <p>Description</p>
-  </div>
-</div>
-```
-+
-```html
-import {Item} from 'module1'
-
-<Item>
-  <tag class="content">
-    @remove
-    <p/>
-    
-    @insert
-    <h1>Title</h1>
+    <li class="second-item"></li>
   </tag>
 </Item>
 ```
  =
 ```html
+@export Item
 <div>
-  <div class="content">
-    <h1>Title</h1>
-  </div>
+  <ul class="list">
+    <li class="item"></li>
+    <li class="second-item"></li>
+  </ul>
 </div>
 ```
+Что бы добавить тег, без указания точного пути, есть аннотации: @prepend, @append, @insert
 
 
-## @empty
-Удаляет всё содержимое текущего тега.
+## Удаление тегов
+Для этого надо использовать аннотацию @remove
+
+
+## Переименование тегов
+Указав путь к тегу, можно просто написать другое имя
 ```html
 @export Item
 <div>
-  <div class="content">
-    <p>Description</p>
-  </div>
+  <ul class="list">
+    <li class="item"></li>
+  </ul>
 </div>
 ```
 +
@@ -295,25 +160,24 @@ import {Item} from 'module1'
 import {Item} from 'module1'
 
 <Item>
-  @empty
-  <tag class="content">
-    @insert
-    <h1>Title</h1>
+  <tag>
+    <div/>
   </tag>
 </Item>
 ```
  =
 ```html
+@export Item
 <div>
-  <div class="content">
-    <h1>Title</h1>
-  </div>
+  <ul class="list">
+    <div class="item"></li>
+  </ul>
 </div>
 ```
 
 
 ## Добавление/переписывание атрибутов
-Что бы добавить или переписать атрибут перед ним нужно поставить `+`
+Любой указанный атрибут (кроме тега `class`) будет переписывать такой же родительский или если у родительского тега нету такого атрибута, то он добавиться
 ```html
 @export Item
 <div>
@@ -325,7 +189,7 @@ import {Item} from 'module1'
 import {Item} from 'module1'
 
 <Item>
-  <h1 +id="header" +title="Header"/>
+  <tag id="header" title="Header"/>
 </Item>
 ```
  =
@@ -359,7 +223,7 @@ import {Item} from 'module1'
 ```
 
 ## Добавление классов
-Что бы добавить класс перед ним нужно поставить `+`
+Любой указаный класс будет добавлен к текущему тегу
 ```html
 @export Item
 <div>
@@ -371,7 +235,7 @@ import {Item} from 'module1'
 import {Item} from 'module1'
 
 <Item>
-  <h1 class="+pull-left"/>
+  <h1 class="pull-left"/>
 </Item>
 ```
  =
@@ -428,8 +292,6 @@ import {Item} from 'module1'
   <tag>Title</tag>
   <tag>
     Title
-  
-    @insert
     <span class="icon"></span>
   </tag>
 </Item>
@@ -441,7 +303,228 @@ import {Item} from 'module1'
   <h2>Sub title <span class="icon"></span></h2>
   <h3><span class="icon"></span> Title</h3>
   <h4>Title<span class="icon"></span></h4>
-  <h5>Title <span class="icon"></span></h5>
+  <h5>
+    Title
+    <span class="icon"></span>
+  </h5>
 </div>
 ```
-Удалить текст или заменить его на пробел нельзя, для этого необходимо обрамлять в исходном темплейте текст в тег, а в текущем темплейте использовать `@empty` или `@remove` перед этим тегом.
+
+
+## Удаление текста
+Удалить текст можно добавив символ мнемонику `&nbsp;` или если вообще без пробелов то можно `&ZeroWidthSpace;` или любой другой непечатаемы символ.
+
+
+## @find
+С помощью этой анотации можно указать путь к тегу через селектор. Теги с этой анотацией будут участвовать в построении пути только внутри себя, для соседей их существовать не будет, так как они не будут относиться к текущему контейнеру.
+```html
+@export Item
+<div>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Title</h1>
+    </div>
+    <div class="content">
+      <p>Description</p>
+    </div>
+  </div>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  @find .header
+  <tag>
+    @append
+    <span>Sub title</span>
+  </tag>
+  
+  <tag class="wrapper">
+    <tag/>
+    <tag class="content">
+      @append
+      <p>Text</p>
+    </tag>
+  </tag>
+</Item>
+```
+Путь к первому `@append` будет `Item .header`, ко второму `Item > *:nth-child(1) > *:nth-child(2)`. 
+Результат:
+```html
+<div>
+  <div class="wrapper">
+    <div class="header">
+      <h1>Title</h1>
+      <span>Sub title</span>
+    </div>
+    <div class="content">
+      <p>Description</p>
+      <p>Text</p>
+    </div>
+  </div>
+</div>
+```
+
+
+## @append
+Добавляет тег в конец текущего контейнера. Добавленный тег будет учавствовать в построении пути, все указанные после него теги так же будут добавленны в конец.
+```html
+@export Item
+<div>
+  <span>Title</span>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  @append
+  <button>OK</button>
+  
+  <button>Cancel</button>
+</Item>
+```
+Кнопка `OK` будет добавлена в конец и путь к ней будет `Item > *:nth-child(2)`, соответсвенно кнопку `Cancel` нужно вставить после неё, т.е. третей в контейнере
+ =
+```html
+<div>
+  <span>Title</span>
+  
+  <button>OK</button>
+  
+  <button>Cancel</button>
+</div>
+```
+
+
+## @prepend
+Добавляет тег в начало текущего контейнера. Добавленный тег будет учавствовать в построении пути.
+```html
+@export Item
+<div>
+  <span>Title</span>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  @prepend
+  <button>OK</button>
+  
+  <span class="header"/>
+</Item>
+```
+ =
+```html
+<div>
+  <button>OK</button>
+  
+  <span class="header">Title</span>
+</div>
+```
+
+
+## @insert
+Добавляет тег в текущую позицию текущего контейнера. Добавленный тег будет учавствовать в построении пути.
+```html
+@export Item
+<div>
+  <h1>Title</h1>
+  <p>Description</p>
+  <button>Ok</button>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <h1/>
+  <tag/>
+  
+  @insert
+  <input type="text"/>
+  
+  <button type="submit"/>
+</Item>
+```
+ =
+```html
+<div>
+  <h1>Title</h1>
+  <p>Description</p>
+  <input type="text"/>
+  <button type="submit">OK</button>
+</div>
+```
+
+
+## @remove
+Удаляет текущий тег.
+```html
+@export Item
+<div>
+  <div class="content">
+    <input type="text"/>
+    <button>OK</button>
+  </div>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  <tag class="content">
+    @remove
+    <input/>
+    
+    <button type="submit"/>
+  </tag>
+</Item>
+```
+ =
+```html
+<div>
+  <div class="content">
+    <button type="submit">OK</button>
+  </div>
+</div>
+```
+
+
+## @empty
+Удаляет всё содержимое текущего тега.
+```html
+@export Item
+<div>
+  <div class="content">
+    <p>Description</p>
+    <button>OK</button>
+  </div>
+</div>
+```
++
+```html
+import {Item} from 'module1'
+
+<Item>
+  @empty
+  <tag class="content">
+    <h1>Title</h1>
+  </tag>
+</Item>
+```
+ =
+```html
+<div>
+  <div class="content">
+    <h1>Title</h1>
+  </div>
+</div>
+```
