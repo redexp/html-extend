@@ -1,0 +1,36 @@
+import Layout from 'layout'
+import {List, Item as TestItem} from 'layout/list'
+import * as Icons, {SaveIcon} from 'icons'
+
+<Layout>
+  @find Header CloseIcon
+  @remove
+  <tag/>
+
+  <Header id="header">Test title</Header>
+
+  @prepend
+  <div class="banner"><img src="banner.jpg" alt="Banner"/></div>
+
+  Test text
+
+  <List class="!list test-list">
+    <TestItem class="!list-item test-item">
+      <tag>
+        Item
+
+        <Icons.Close>
+          @find i.close
+          <tag>X</tag>
+        </Icons.Close>
+      </tag>
+    </TestItem>
+  </List>
+
+  @append
+  <button><SaveIcon/> OK</button>
+
+  <div class="footer">
+    <p>Text</p>
+  </div>
+</Layout>
