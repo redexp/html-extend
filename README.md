@@ -74,11 +74,9 @@ import {Item} from 'module1'
 ```html
 <div>
   <ul class="list">
-    <li class="item">
-      <h1>Title</h1>
+    <li class="item"><h1>Title</h1>
       <span class="h2">Title</span>
-      <button>OK</button>
-    </li>
+      <button>OK</button></li>
   </ul>
 </div>
 ```
@@ -391,9 +389,7 @@ import {Item} from 'module1'
 ```html
 <div>
   <span>Title</span>
-  
-  <button>OK</button>
-</div>
+<button>OK</button></div>
 ```
 Если вы хотите добавить несколько тего, то перед каждым нужно будет ставить `@append`.
 
@@ -419,9 +415,7 @@ import {Item} from 'module1'
 ```
  =
 ```html
-<div>
-  <button>OK</button>
-  
+<div><button>OK</button>
   <span class="header">Title</span>
 </div>
 ```
