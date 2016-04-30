@@ -204,13 +204,19 @@ function compileShadowDom(node) {
 
         var root = node,
             path = getPath(text, root),
-            target = get(root.shadowDom, path);
+            targetText = get(root.shadowDom, path);
 
-        if (target && target.type === 'text') {
-            merge(target, text);
+        if (targetText && targetText.type === 'text') {
+            merge(targetText, text);
         }
         else {
-            insertTo(root.shadowDom, path, emptyClone(text));
+            targetText = insertTo(root.shadowDom, path, emptyClone(text));
+        }
+
+        var targetTag = targetText.next;
+
+        if (targetTag) {
+            merge(targetTag, tag);
         }
 
         text.annotations.forEach(function (annotation) {
@@ -232,8 +238,27 @@ function compileShadowDom(node) {
                 insertTo(root.shadowDom, path, clone(tag));
                 insertTo(text.parent, ['children', path[path.length - 1]], tag);
                 break;
+
+            case 'remove':
+                if (targetTag.next && targetTag.next.type === 'text') {
+                    targetText.data += targetTag.next.data;
+                    remove(targetTag.next);
+                }
+                
+                remove(targetTag);
+                break;
+
+            case 'empty':
+                insertTo(text.parent, ['children', Number(path[path.length - 1]) + 1], tag);
+                targetTag.children = [];
+                break;
             }
         });
+
+        if (text.next && text.next.type === 'text') {
+            text.next.data = text.data + text.next.data;
+            remove(text);
+        }
     });
 }
 
@@ -449,6 +474,14 @@ function insertTo(dom, path, node) {
     node.parent = parent;
     node.prev = parent.children[index - 1] || null;
     node.next = parent.children[index + 1] || null;
+
+    if (node.prev) {
+        node.prev.next = node;
+    }
+
+    if (node.next) {
+        node.next.prev = node;
+    }
 
     return node;
 }

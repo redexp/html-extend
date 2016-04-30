@@ -9,11 +9,24 @@ import Button from 'button'
 
   @append
   <Button>
+    @remove
+    <i></i>
+
     @append
     <i class="icon"></i>
   </Button>
 
-  <p>Test</p>
+  <p>
+    Test
+
+    @empty
+    <span>
+      <i class="test"></i>
+    </span>
+  </p>
+
+  @remove
+  <tag/>
 </Item>
 
 <Item>
