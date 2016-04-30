@@ -170,7 +170,10 @@ function compileShadowDom(node) {
             shadowDom: isObject
         },
         include: function (item) {
-            return item.field === 'children' && !item.target.shadowDom;
+            return (
+                item.field === 'children' ||
+                item.path[item.path.length - 1] === 'children'
+            );
         },
         callback: function (item) {
             if (item.target === node) return;
@@ -184,6 +187,7 @@ function compileShadowDom(node) {
             text = tag.prev;
 
         if (!(
+            tag !== node &&
             text &&
             text.type === 'text' &&
             text.annotations &&
@@ -194,8 +198,20 @@ function compileShadowDom(node) {
 
         remove(tag);
 
+        if (tag.shadowDom) {
+            merge(tag.shadowDom, tag);
+        }
+
         var root = node,
-            path = getPath(text, root);
+            path = getPath(text, root),
+            target = get(root.shadowDom, path);
+
+        if (target && target.type === 'text') {
+            merge(target, text);
+        }
+        else {
+            insertTo(root.shadowDom, path, emptyClone(text));
+        }
 
         text.annotations.forEach(function (annotation) {
             switch (annotation.name) {
@@ -207,13 +223,15 @@ function compileShadowDom(node) {
                 return;
             
             case 'append':
-                if (tag.shadowDom) {
-                    merge(tag.shadowDom, tag);
-                }
-
                 path[path.length - 1] = Number.MAX_VALUE;
                 insertTo(root.shadowDom, path, tag.shadowDom || clone(tag));
                 return;
+
+            case 'insert':
+                path[path.length - 1] = Number(path[path.length - 1]) + 1;
+                insertTo(root.shadowDom, path, clone(tag));
+                insertTo(text.parent, ['children', path[path.length - 1]], tag);
+                break;
             }
         });
     });
@@ -379,6 +397,8 @@ function mergeTag(target, source) {
 }
 
 function mergeText(tagret, source) {
+    if (!source.data.trim()) return;
+
     tagret.data = source.data;
 
     return tagret;
