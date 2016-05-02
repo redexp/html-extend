@@ -23,21 +23,7 @@ function htmlFileToDom(file) {
     
     // comments
 
-    find(dom.children, {type: 'comment'}, function (item) {
-        var comment = item.target;
-
-        if (
-            comment.prev &&
-            comment.prev.type === 'text' &&
-            comment.next &&
-            comment.next.type === 'text'
-        ) {
-            comment.prev.data += comment.next.data;
-            remove(comment.next);
-        }
-
-        remove(comment);
-    });
+    removeComments(dom);
 
     // imports
 
@@ -132,6 +118,8 @@ function htmlFileToDom(file) {
 
         var shadowDom = root.shadowDom;
 
+        merge(shadowDom, root);
+
         find(root, {type: /^(tag|text)$/}, function (item) {
             if (item.target === root) return;
 
@@ -150,6 +138,9 @@ function htmlFileToDom(file) {
             }
             else if (target && target.type === tag.type) {
                 merge(target, tag);
+            }
+            else if (tag.type === 'text') {
+                insertTo(shadowDom, path, clone(tag));
             }
             else {
                 insertTo(shadowDom, path, emptyClone(tag));
@@ -259,6 +250,24 @@ function compileShadowDom(node) {
             text.next.data = text.data + text.next.data;
             remove(text);
         }
+    });
+}
+
+function removeComments(root) {
+    find(root, {type: 'comment'}, function (item) {
+        var comment = item.target;
+
+        if (
+            comment.prev &&
+            comment.prev.type === 'text' &&
+            comment.next &&
+            comment.next.type === 'text'
+        ) {
+            comment.prev.data += comment.next.data;
+            remove(comment.next);
+        }
+
+        remove(comment);
     });
 }
 

@@ -3,7 +3,7 @@ var toHtml = require('simple-html-dom-parser').getOuterHTML,
     htmlFileToDom = require('./src/html-to-dom'),
     fs = require('fs');
 
-var dom = htmlFileToDom(__dirname + '/test/annotations/index.html');
+var dom = htmlFileToDom(__dirname + '/test/merge/index.html');
 
 
 console.log(toHtml(dom));

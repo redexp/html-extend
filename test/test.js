@@ -1,11 +1,13 @@
 var chai = require('chai'),
-    expect = require('chai').expect;
+    expect = require('chai').expect,
+    search = require('simple-object-query').search,
+    toHtml = require('simple-html-dom-parser').getOuterHTML;
 
 chai.use(require('chai-shallow-deep-equal'));
 
 var htmFileToDom = require('../src/html-to-dom');
 
-describe('dom', function () {
+describe('imports', function () {
     it('should have imports', function () {
         var dom = htmFileToDom(__dirname + '/imports/index.html');
 
@@ -80,3 +82,31 @@ describe('dom', function () {
         });
     });
 });
+
+describe('merge', function () {
+    it('should merge', function () {
+        var dom = toHtml(htmFileToDom(__dirname + '/merge/index.html')),
+            out = toHtml(htmFileToDom(__dirname + '/merge/output.html'));
+
+        expect(dom).to.equal(out);
+    });
+});
+
+function removeLinks(root) {
+    root.imports = root.exports = null;
+
+    search({
+        source: root,
+        query: {
+            parent: function (val) {
+                return val && typeof val === 'object';
+            }
+        },
+        include: ['children'],
+        callback: function (item) {
+            var node = item.target;
+
+            node.parent = node.prev = node.next = null;
+        }
+    });
+}
