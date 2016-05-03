@@ -92,21 +92,11 @@ describe('merge', function () {
     });
 });
 
-function removeLinks(root) {
-    root.imports = root.exports = null;
+describe('annotations', function () {
+    it('should handle annotations', function () {
+        var dom = toHtml(htmFileToDom(__dirname + '/annotations/index.html')),
+            out = toHtml(htmFileToDom(__dirname + '/annotations/output.html'));
 
-    search({
-        source: root,
-        query: {
-            parent: function (val) {
-                return val && typeof val === 'object';
-            }
-        },
-        include: ['children'],
-        callback: function (item) {
-            var node = item.target;
-
-            node.parent = node.prev = node.next = null;
-        }
+        expect(dom).to.equal(out);
     });
-}
+});

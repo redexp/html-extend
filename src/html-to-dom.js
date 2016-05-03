@@ -206,10 +206,6 @@ function compileShadowDom(node) {
 
         var targetTag = targetText.next;
 
-        if (targetTag) {
-            merge(targetTag, tag);
-        }
-
         text.annotations.forEach(function (annotation) {
             switch (annotation.name) {
             
@@ -240,6 +236,7 @@ function compileShadowDom(node) {
                 break;
 
             case 'empty':
+                merge(targetTag, tag);
                 insertTo(text.parent, ['children', Number(path[path.length - 1]) + 1], tag);
                 targetTag.children = [];
                 break;
