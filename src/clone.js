@@ -11,6 +11,10 @@ function clone(node, parent) {
             obj.parent = parent;
             break;
 
+        case 'shadowDom':
+            obj[field] = node[field];
+            break;
+
         case 'children':
             obj.children = [].concat(node.children);
 
@@ -38,6 +42,10 @@ function clone(node, parent) {
                 obj[field] = clone(node[field]);
                 break;
 
+            case 'array':
+                obj[field] = [].concat(node[field]);
+                break;
+
             default:
                 obj[field] = node[field];
             }
@@ -52,7 +60,7 @@ function typeOf(val) {
 
     switch (type) {
     case 'object':
-        return val ? type : 'null';
+        return val ? Array.isArray(val) ? 'array' : 'object' : 'null';
 
     default:
         return val;

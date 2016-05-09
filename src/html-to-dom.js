@@ -2,15 +2,12 @@ var parser = require('simple-html-dom-parser').parse,
     search = require('simple-object-query').search,
     get = require('simple-object-query').get,
     clone = require('./clone'),
+    cssFind = require('./css-find'),
     fs = require('fs'),
     util = require('util'),
     pt = require('path');
 
 module.exports = htmlFileToDom;
-
-// var annotations = {
-//     find: findAnnotation
-// };
 
 var modules = {};
 
@@ -70,9 +67,7 @@ function htmlFileToDom(file) {
         });
     }
 
-    // exports
-
-    dom.exports = {};
+    // annotations
 
     find(dom, {type: 'text'}, function (item) {
         var text = item.target;
@@ -80,15 +75,11 @@ function htmlFileToDom(file) {
         text.annotations = [];
 
         text.data = getAnnotationsFromText(text.data, function (annotation) {
-            text.annotations.push(annotation);
-
             if (!text.next || text.next.type !== 'tag') {
                 throw new Error('After annotations should be a tag');
             }
 
-            if (annotation.name !== 'export') return;
-
-            dom.exports[annotation.value || 'default'] = text.next;
+            text.annotations.push(annotation);
         });
     });
 
@@ -106,6 +97,10 @@ function htmlFileToDom(file) {
 
         var parentModule = requireModule(parent.path);
 
+        if (!parentModule[parent.name]) {
+            throw new Error('Undefined import module ' + parent.name);
+        }
+
         tag.shadowDom = clone(parentModule[parent.name]);
     });
     
@@ -118,36 +113,25 @@ function htmlFileToDom(file) {
 
         var shadowDom = root.shadowDom;
 
-        merge(shadowDom, root);
-
-        find(root, {type: /^(tag|text)$/}, function (item) {
-            if (item.target === root) return;
-
-            var tag = item.target,
-                path = item.path,
-                target = get(shadowDom, path);
-
-            if (tag.shadowDom) {
-                merge(tag.shadowDom, tag);
-                if (target) {
-                    replace(target, tag.shadowDom);
-                }
-                else {
-                    insertTo(shadowDom, path, tag.shadowDom);
-                }
-            }
-            else if (target && target.type === tag.type) {
-                merge(target, tag);
-            }
-            else if (tag.type === 'text') {
-                insertTo(shadowDom, path, clone(tag));
-            }
-            else {
-                insertTo(shadowDom, path, emptyClone(tag));
-            }
-        });
+        deepMergeShadowDom(root, shadowDom);
 
         replace(root, root.shadowDom);
+
+        delete root.shadowDom;
+    });
+
+    // exports
+
+    dom.exports = {};
+
+    find(dom, {type: 'text'}, function (item) {
+        var text = item.target;
+
+        text.annotations.forEach(function (annotation) {
+            if (annotation.name !== 'export') return;
+
+            dom.exports[annotation.value.trim() || 'default'] = text.next;
+        });
     });
     
     return dom;
@@ -187,8 +171,6 @@ function compileShadowDom(node) {
             return;
         }
 
-        remove(tag);
-
         if (tag.shadowDom) {
             merge(tag.shadowDom, tag);
         }
@@ -204,25 +186,27 @@ function compileShadowDom(node) {
             targetText = insertTo(root.shadowDom, path, emptyClone(text));
         }
 
-        var targetTag = targetText.next;
+        var targetTag = targetText.next,
+            context = null;
 
         text.annotations.forEach(function (annotation) {
             switch (annotation.name) {
             
             case 'prepend':
                 path[path.length - 1] = 0;
-                insertTo(root.shadowDom, path, clone(tag));
+                insertTo(root.shadowDom, path, context || flatClone(tag));
                 insertTo(text.parent, ['children', 0], tag);
                 return;
             
             case 'append':
+                remove(tag);
                 path[path.length - 1] = Number.MAX_VALUE;
-                insertTo(root.shadowDom, path, tag.shadowDom || clone(tag));
+                insertTo(root.shadowDom, path, context || tag.shadowDom || flatClone(tag));
                 return;
 
             case 'insert':
                 path[path.length - 1] = Number(path[path.length - 1]) + 1;
-                insertTo(root.shadowDom, path, clone(tag));
+                insertTo(root.shadowDom, path, context || flatClone(tag));
                 insertTo(text.parent, ['children', path[path.length - 1]], tag);
                 break;
 
@@ -231,14 +215,25 @@ function compileShadowDom(node) {
                     targetText.data += targetTag.next.data;
                     remove(targetTag.next);
                 }
-                
+
+                remove(tag);
                 remove(targetTag);
                 break;
 
             case 'empty':
                 merge(targetTag, tag);
-                insertTo(text.parent, ['children', Number(path[path.length - 1]) + 1], tag);
                 targetTag.children = [];
+                break;
+
+            case 'find':
+                context = targetTag = cssFind(targetTag.parent, annotation.value);
+
+                if (!context) {
+                    throw new Error(`Can't find tag by selector "${annotation.value}"`);
+                }
+
+                deepMergeShadowDom(tag, context);
+                remove(tag);
                 break;
             }
         });
@@ -328,7 +323,7 @@ function getImportsFromText(text, cb) {
 }
 
 function getAnnotationsFromText(text, cb) {
-    return text.replace(/^\s*@([\w\-]+)\s*(.*)/gm, function (x, name, value) {
+    return text.replace(/^\s*@([\w\-]+) *(.*)\n/gm, function (x, name, value) {
         cb({
             name: name,
             value: value
@@ -454,6 +449,37 @@ function merge(target, source) {
     return target;
 }
 
+function deepMergeShadowDom(root, shadowDom) {
+    merge(shadowDom, root);
+
+    find(root, {type: /^(tag|text)$/}, function (item) {
+        if (item.target === root) return;
+
+        var tag = item.target,
+            path = item.path,
+            target = get(shadowDom, path);
+
+        if (tag.shadowDom) {
+            merge(tag.shadowDom, tag);
+            if (target) {
+                replace(target, tag.shadowDom);
+            }
+            else {
+                insertTo(shadowDom, path, tag.shadowDom);
+            }
+        }
+        else if (target && target.type === tag.type) {
+            merge(target, tag);
+        }
+        else if (tag.type === 'text') {
+            insertTo(shadowDom, path, flatClone(tag));
+        }
+        else {
+            insertTo(shadowDom, path, emptyClone(tag));
+        }
+    });
+}
+
 function classHash(classes) {
     var hash = {};
 
@@ -529,6 +555,7 @@ function createText(data) {
     return {
         type: 'text',
         data: data || '',
+        annotations: [],
         parent: null,
         prev: null,
         next: null
@@ -597,31 +624,14 @@ function getPath(node, root) {
     return path.reverse();
 }
 
-function getChildrenPath(node, root) {
-    var path = getPath(node, root);
+function flatClone(node) {
+    node = clone(node);
 
-    path.shift();
-
-    return path;
-}
-
-function getParentWithShadowDom(node) {
-    return search({
-        query: {
-            type: 'tag'
-        },
-        source: node,
-        include: function (item) {
-            return (
-                item.field === 'parent'
-            );
-        },
-        callback: function (item) {
-            if (item.target === node) return;
-
-            if (item.target.shadowDom) return item.target;
-        }
+    find(node, {shadowDom: isObject}, function (item) {
+        replace(item.target, flatClone(item.target.shadowDom));
     });
+
+    return node;
 }
 
 function wrapper(dom) {

@@ -1,13 +1,13 @@
 import Layout from 'layout'
-import {List, Item as TestItem} from 'layout/list'
-import * as Icons, {SaveIcon} from 'icons'
+import List, {Item as TestItem} from 'layout/list'
+import * as Icons, {Save} from 'icons'
 
 <Layout>
-  @find Header CloseIcon
+  @find h1 span
   @remove
   <tag/>
 
-  <Header id="header">Test title</Header>
+  <h1 id="header">Test title</h1>
 
   @prepend
   <div class="banner"><img src="banner.jpg" alt="Banner"/></div>
@@ -28,8 +28,9 @@ import * as Icons, {SaveIcon} from 'icons'
   </List>
 
   @append
-  <button><SaveIcon/> OK</button>
+  <button><Save/> OK</button>
 
+  @empty
   <div class="footer">
     <p>Text</p>
   </div>

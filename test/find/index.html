@@ -1,0 +1,41 @@
+import Item from 'item'
+
+<Item>
+  @find button[type="submit"]
+  @remove
+  <tag/>
+
+  @find h1 .close
+  <tag class="!close open">X</tag>
+</Item>
+
+<Item>
+  @find .close
+  @append
+  <tag id="close"/>
+</Item>
+
+<Item>
+  @find .close
+  @prepend
+  <tag rel="close"/>
+</Item>
+
+<Item>
+  <h1/>
+
+  @find button[type="submit"]
+  @insert
+  <button class="save"><i class="save"></i></button>
+
+  <p></p>
+</Item>
+
+<Item>
+  <h1></h1>
+
+  @find button[type="submit"]
+  @insert
+  @empty
+  <button class="empty"><i class="empty"></i> Empty</button>
+</Item>
