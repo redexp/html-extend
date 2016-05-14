@@ -4,16 +4,11 @@
 ## Issue
 For example, you have some html file with `<table>` tag with rich markup and you need it in another file but without some buttons, different classes and labels, or even worse, you will need to wrap some tag. You can solve it with dozens of parameters and if's but you markup will become unreadable.
 
-## Solution
-Extend origin html file
+## My solution
+Extend origin html file using es6 like module system and annotations.
 
-## Анотации
-Анотации вида `@anotationName` будут служить ключивыми структурами с помощью которых движок будет знать что делать с тегом. Анотацию нужно ставить непосредственно перед тегом.Любой текст, между анотацией и тегом, будет относиться к анотации.
-
-
-## Модульность
-Модули будут максимально приближёнными к модулям ES6. По аналогии с Node.js глобальные модули будут храниться в папке `html_modules`.
-
+## Annotations
+Annotations is text like `@anotationName` before tags which describe how tag should be modified.
 
 ## @export
 Что бы экспортнуть тег достаточно перед ним написать анотацию `@export TagAlias` где `TagAlias` - имя тега когда его будут импортировать. Если `TagAlias` будет равен `default` то этот тег можно будет импортировать как дефолтный. Анотация `@export` может нахоиться на любом уровне вложенности.
@@ -24,7 +19,6 @@ Extend origin html file
   <button class="btn btn-xs">OK</button>
 </div>
 ```
-
 
 ## import
 Что бы импортнуть тег необходимо использовать слово `import` одним из следующих вариантов
