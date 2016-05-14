@@ -187,7 +187,10 @@ function compileShadowDom(node) {
         }
 
         var targetTag = targetText.next,
-            context = null;
+            context,
+            currentContainer,
+            targetContainer,
+            targetNode;
 
         text.annotations.forEach(function (annotation) {
             switch (annotation.name) {
@@ -232,11 +235,46 @@ function compileShadowDom(node) {
                     throw new Error(`Can't find tag by selector "${annotation.value}"`);
                 }
 
-                deepMergeShadowDom(tag, context);
                 remove(tag);
+                break;
+
+            case 'appendTo':
+                currentContainer = get(root.shadowDom, getPath(text.parent, root));
+                targetContainer = cssFind(currentContainer, annotation.value);
+                
+                remove(tag);
+                appendTo(targetContainer, context || flatClone(tag));
+                break;
+
+            case 'prependTo':
+                currentContainer = get(root.shadowDom, getPath(text.parent, root));
+                targetContainer = cssFind(currentContainer, annotation.value);
+
+                remove(tag);
+                prependTo(targetContainer, context || flatClone(tag));
+                break;
+
+            case 'insertAfter':
+                currentContainer = get(root.shadowDom, getPath(text.parent, root));
+                targetNode = cssFind(currentContainer, annotation.value);
+
+                remove(tag);
+                insertAfter(targetNode, context || flatClone(tag));
+                break;
+
+            case 'insertBefore':
+                currentContainer = get(root.shadowDom, getPath(text.parent, root));
+                targetNode = cssFind(currentContainer, annotation.value);
+
+                remove(tag);
+                insertBefore(targetNode, context || flatClone(tag));
                 break;
             }
         });
+
+        if (context) {
+            deepMergeShadowDom(tag, context);
+        }
 
         if (text.next && text.next.type === 'text') {
             text.next.data = text.data + text.next.data;
@@ -518,6 +556,34 @@ function insertTo(dom, path, node) {
     return node;
 }
 
+function appendTo(parent, node) {
+    remove(node);
+
+    insertTo(parent, ['children', Number.MAX_VALUE], node);
+}
+
+function prependTo(parent, node) {
+    remove(node);
+
+    insertTo(parent, ['children', 0], node);
+}
+
+function insertBefore(target, node) {
+    remove(node);
+
+    var index = target.parent.children.indexOf(target);
+
+    insertTo(target.parent, ['children', index], node);
+}
+
+function insertAfter(target, node) {
+    remove(node);
+
+    var index = target.parent.children.indexOf(target);
+
+    insertTo(target.parent, ['children', index + 1], node);
+}
+
 function replace(target, replacment) {
     replacment.parent = target.parent;
     replacment.prev = target.prev;
@@ -596,6 +662,8 @@ function remove(node) {
 
 function getPath(node, root) {
     var path = [];
+
+    if (node === root) return path;
 
     search({
         query: {

@@ -39,3 +39,30 @@ import Item from 'item'
   @empty
   <button class="empty"><i class="empty"></i> Empty</button>
 </Item>
+
+<Item>
+  @find h1 > .close
+  @appendTo p > button[type="submit"]
+  <tag class="!close save"/>
+</Item>
+
+<Item>
+  @find p > button[type="button"]
+  @prependTo p
+  @empty
+  <button><i class="cancel"></i></button>
+</Item>
+
+<Item>
+  @find p > button[type="submit"]
+  @insertAfter p > button[type="button"]
+  @empty
+  <button><i class="save"></i></button>
+</Item>
+
+<Item>
+  @find p > button[type="submit"]
+  @insertBefore p
+  @empty
+  <button><i class="save"></i></button>
+</Item>

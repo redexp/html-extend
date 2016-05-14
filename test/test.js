@@ -99,12 +99,12 @@ describe('annotations', function () {
 describe('cssFind', function () {
     var parser = require('simple-html-dom-parser').parse,
         cssFind = require('../src/css-find');
-    
+
     it('should find node by css selector', function () {
         var node = parser(`<div><a href="index.html">Test <span class="open"></span> <i class="close"></i></a></div>`);
-        
+
         var target = cssFind(node, '.close');
-        
+
         expect(target).to.shallowDeepEqual({
             name: 'i',
             attr: {
@@ -200,7 +200,7 @@ describe('cssFind', function () {
             }
         });
     });
-    
+
     it('should handle pseudos', function () {
         var node = parser(`<div><a href="index.html">Test <span class="open"></span> <span class="close"></span></a></div>`);
 

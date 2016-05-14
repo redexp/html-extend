@@ -28,7 +28,19 @@ import Button from 'button'
   @insert
   <p class="wrapper">Wrapper <span></span></p>
 
+  @appendTo .description
+  <span class="cut"></span>
+
   <tag></tag>
+
+  @prependTo .description
+  <span class="start"></span>
+
+  @insertAfter .description .cut
+  <span class="end"></span>
+
+  @insertBefore .description .cut
+  <span class="read-more"></span>
 
   @remove
   <tag/>
