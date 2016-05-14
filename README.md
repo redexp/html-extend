@@ -1,9 +1,11 @@
 # html-extend
 
 
-## Задача
-У нас есть просто html файл, нам нужно создать на его основе новый, но с добавленными тегами в определённых местах.
+## Issue
+For example, you have some html file with `<table>` tag with rich markup and you need it in another file but without some buttons, different classes and labels, or even worse, you will need to wrap some tag. You can solve it with dozens of parameters and if's but you markup will become unreadable.
 
+## Solution
+Extend origin html file
 
 ## Анотации
 Анотации вида `@anotationName` будут служить ключивыми структурами с помощью которых движок будет знать что делать с тегом. Анотацию нужно ставить непосредственно перед тегом.Любой текст, между анотацией и тегом, будет относиться к анотации.
