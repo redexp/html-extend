@@ -7,12 +7,28 @@ var parser = require('simple-html-dom-parser').parse,
     util = require('util'),
     pt = require('path');
 
-module.exports = htmlFileToDom;
+module.exports = htmlToDom;
+
+/**
+ * @typedef {Object} HtmlModule
+ * @property {Object} imports - Hash of imported tags
+ * @property {Object} exports - Hash of exported tags
+ * @property {Array} children
+ */
 
 var modules = {};
 
-function htmlFileToDom(file) {
-    var dom = parser(fs.readFileSync(file).toString(), {
+/**
+ * @param {String} html
+ * @param {String} filePath This param needs to resolve path of imported files
+ * @returns {HtmlModule}
+ */
+function htmlToDom(html, filePath) {
+    if (!filePath) {
+        throw new Error('File path is required');
+    }
+
+    var dom = parser(html, {
         regex: {
             attribute: /[!\w][\w:\-\.]*/
         }
@@ -27,7 +43,7 @@ function htmlFileToDom(file) {
     dom.imports = {};
 
     if (dom.children[0] && dom.children[0].type === 'text') {
-        var dir = pt.dirname(file);
+        var dir = pt.dirname(filePath);
 
         dom.children[0].data = getImportsFromText(dom.children[0].data, function (item) {
             item.path = pt.join(dir, item.path);
@@ -388,7 +404,7 @@ function requireModule(file) {
             throw new Error('File "'+ file +'" not exists or not readable')
         }
 
-        modules[file] = htmlFileToDom(file + ext).exports;
+        modules[file] = htmlToDom(fs.readFileSync(file + ext).toString(), file + ext).exports;
     }
 
     return modules[file];
@@ -700,26 +716,4 @@ function flatClone(node) {
     });
 
     return node;
-}
-
-function wrapper(dom) {
-    var obj = {};
-    for (var field in dom) {
-        if (!dom.hasOwnProperty(field)) continue;
-        if ('parent prev next'.indexOf(field) > -1) continue;
-        obj[field] = dom[field];
-    }
-
-    if (dom.children) {
-        obj.children = [].concat(dom.children);
-        dom.children.forEach(function (item, i) {
-            obj.children[i] = wrapper(item);
-        });
-    }
-
-    return obj;
-}
-
-function log(dom) {
-    console.log(util.inspect(wrapper(dom), false, null));
 }

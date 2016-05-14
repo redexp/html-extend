@@ -1,11 +1,8 @@
-var chai = require('chai'),
-    expect = require('chai').expect,
-    search = require('simple-object-query').search,
-    toHtml = require('simple-html-dom-parser').getOuterHTML;
+var chai = require('chai').use(require('chai-shallow-deep-equal')),
+    expect = chai.expect;
 
-chai.use(require('chai-shallow-deep-equal'));
-
-var htmFileToDom = require('../src/html-to-dom');
+var htmFileToDom = require('../index').htmlFileToDom,
+    compile = require('../index').compile;
 
 describe('imports', function () {
     it('should have imports', function () {
@@ -80,17 +77,17 @@ describe('imports', function () {
 
 describe('merge', function () {
     it('should merge', function () {
-        var dom = toHtml(htmFileToDom(__dirname + '/merge/index.html')),
-            out = toHtml(htmFileToDom(__dirname + '/merge/output.html'));
+        var input = compile(__dirname + '/merge/index.html'),
+            output = compile(__dirname + '/merge/output.html');
 
-        expect(dom).to.equal(out);
+        expect(input).to.equal(output);
     });
 });
 
 describe('annotations', function () {
     it('should handle annotations', function () {
-        var dom = toHtml(htmFileToDom(__dirname + '/annotations/index.html')),
-            out = toHtml(htmFileToDom(__dirname + '/annotations/output.html'));
+        var dom = compile(__dirname + '/annotations/index.html'),
+            out = compile(__dirname + '/annotations/output.html');
 
         expect(dom).to.equal(out);
     });
@@ -230,8 +227,8 @@ describe('cssFind', function () {
 
 describe('find', function () {
     it('should handle find annotation', function () {
-        var dom = toHtml(htmFileToDom(__dirname + '/find/index.html')),
-            out = toHtml(htmFileToDom(__dirname + '/find/output.html'));
+        var dom = compile(__dirname + '/find/index.html'),
+            out = compile(__dirname + '/find/output.html');
 
         expect(dom).to.equal(out);
     });
@@ -239,8 +236,8 @@ describe('find', function () {
 
 describe('complex', function () {
     it('should handle everything', function () {
-        var dom = toHtml(htmFileToDom(__dirname + '/complex/index.html')),
-            out = toHtml(htmFileToDom(__dirname + '/complex/output.html'));
+        var dom = compile(__dirname + '/complex/index.html'),
+            out = compile(__dirname + '/complex/output.html');
 
         expect(dom).to.equal(out);
     });

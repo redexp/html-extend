@@ -1,0 +1,35 @@
+{
+  "name": "html-extend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {
+    "css-selector-parser": "^1.1.0",
+    "simple-html-dom-parser": "^1.1.2",
+    "simple-object-query": "^1.6.0"
+  },
+  "devDependencies": {
+    "chai-shallow-deep-equal": "^1.4.0",
+    "chai": "^3.5.0",
+    "mocha": "^2.4.5"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/redexp/html-extend.git"
+  },
+  "keywords": [
+    "html"
+  ],
+  "author": "Sergii Kliuchnyk",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/redexp/html-extend/issues"
+  },
+  "homepage": "https://github.com/redexp/html-extend#readme"
+}

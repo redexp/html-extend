@@ -1,35 +1,19 @@
 var toHtml = require('simple-html-dom-parser').getOuterHTML,
-    util = require('util'),
-    htmlFileToDom = require('./src/html-to-dom'),
-    fs = require('fs');
+    htmlFileToDom = require('./src/html-file-to-dom'),
+    htmlToDom = require('./src/html-to-dom');
 
-var dom = htmlFileToDom(__dirname + '/test/annotations/index.html');
+module.exports.compile = compile;
 
+module.exports.htmlToDom = htmlToDom;
 
-console.log(toHtml(dom));
-//
-//console.log(toHtml(dom));
+module.exports.htmlFileToDom = htmlFileToDom;
 
-// console.log(fs.accessSync(__dirname + '/test.html', fs.R_OK));
+module.exports.domToHtml = toHtml;
 
-function wrapper(dom) {
-    var obj = {};
-    for (var field in dom) {
-        if (!dom.hasOwnProperty(field)) continue;
-        if ('parent prev next'.indexOf(field) > -1) continue;
-        obj[field] = dom[field];
-    }
-
-    if (dom.children) {
-        obj.children = [].concat(dom.children);
-        dom.children.forEach(function (item, i) {
-            obj.children[i] = wrapper(item);
-        });
-    }
-
-    return obj;
-}
-
-function log(dom) {
-    console.log(util.inspect(wrapper(dom), false, null));
+/**
+ * @param filePath
+ * @returns {String}
+ */
+function compile(filePath) {
+    return toHtml(htmlFileToDom(filePath));
 }
