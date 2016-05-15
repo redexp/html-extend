@@ -688,5 +688,5 @@ import {Item} from './module1'
  
 
 ## Contribute
-Help me improve this doc and any PR are welcome.
+Help me improve this doc and any comments are welcome in issues.
 

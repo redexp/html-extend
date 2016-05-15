@@ -41,11 +41,16 @@ function htmlToDom(html, filePath) {
     // imports
 
     dom.imports = {};
+    
+    var importsText = dom.children[0] && dom.children[0].type === 'text' ? 
+                        dom.children[0] :
+                      dom.children.length >= 2 && dom.children[0].type === 'doctype' && dom.children[1].type === 'text' ? 
+                        dom.children[1] : null;
 
-    if (dom.children[0] && dom.children[0].type === 'text') {
+    if (importsText) {
         var dir = pt.dirname(filePath);
 
-        dom.children[0].data = getImportsFromText(dom.children[0].data, function (item) {
+        importsText.data = getImportsFromText(importsText.data, function (item) {
             item.path = pt.join(dir, item.path);
 
             var importName = item.alias || item.name;
@@ -332,7 +337,7 @@ function find(dom, query, cb) {
 }
 
 function getImportsFromText(text, cb) {
-    return text.replace(/^\s*import\s+(.+)\s+from\s+["'](.+)["']\s*/gm, function (x, items, path) {
+    return text.replace(/^ *import\s+(.+)\s+from\s+["'](.+)["'] *(\r\n|\n)?/gm, function (x, items, path) {
         items
             .replace(/\{([^}]+)}/, function (x, items) {
                 items
@@ -377,7 +382,7 @@ function getImportsFromText(text, cb) {
 }
 
 function getAnnotationsFromText(text, cb) {
-    return text.replace(/^\s*@([\w\-]+) *(.*)\n/gm, function (x, name, value) {
+    return text.replace(/^ *@([\w\-]+) *(.*)(\r\n|\n)?/gm, function (x, name, value) {
         cb({
             name: name,
             value: value
