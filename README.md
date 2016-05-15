@@ -1,11 +1,38 @@
-# html-extend
+html-extend
+===========
 
+[![Build Status](https://travis-ci.org/redexp/html-extend.svg?branch=master)](https://travis-ci.org/redexp/html-extend)
 
 ## Issue
 For example, you have some html file with `<table>` tag with rich markup and you need it in another file but without some buttons, different classes and labels, or even worse, you will need to wrap some tag. You can solve it with dozens of parameters and if's but you markup will become unreadable.
 
 ## My solution
 Extend origin html file using es6 like module system and annotations.
+
+1. [Annotations](#annotations)
+2. [export](#export)
+3. [import](#import)
+4. [Path to tag](#path-to-tag)
+5. [Add tag](#add-tag)
+6. [Remove tag](#remove-tag)
+7. [Rename tag](#rename-tag)
+8. [Add/rewrite attribute](#addrewrite-attribute)
+9. [Remove attribute](#remove-attribute)
+10. [Add class](#add-class)
+11. [Rewrite text in tag](#rewrite-text-in-tag)
+12. [Remove text](#remove-text)
+13. [@find](#find)
+14. [@append](#append)
+15. [@prepend](#prepend)
+16. [@remove](#remove)
+17. [@empty](#empty)
+18. [@appendTo](#appendto)
+19. [@prependTo](#prependto)
+20. [@insertBefore](#insertbefore)
+21. [@insertAfter](#insertafter)
+22. [Future features](#future-features)
+23. [Contribute](#contribute)
+
 
 ## Annotations
 Annotations is text like `@anotationName` before tags which describe how tag should be modified.
