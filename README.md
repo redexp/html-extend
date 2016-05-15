@@ -685,6 +685,7 @@ import {Item} from './module1'
 ## Future features
 1. Folder `html_modules` just like `node_modules`
 2. Extensions to handle import of any file type like Jade or React
+3. Global tags for case when you don't want to import every time `Button` from bootstrap.
  
 
 ## Contribute
