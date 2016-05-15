@@ -2,7 +2,7 @@ var chai = require('chai').use(require('chai-shallow-deep-equal')),
     expect = chai.expect;
 
 var htmFileToDom = require('../index').htmlFileToDom,
-    compile = require('../index').compile;
+    render = require('../index').render;
 
 describe('imports', function () {
     it('should have imports', function () {
@@ -77,8 +77,8 @@ describe('imports', function () {
 
 describe('merge', function () {
     it('should merge', function () {
-        var input = compile(__dirname + '/merge/index.html'),
-            output = compile(__dirname + '/merge/output.html');
+        var input = render(__dirname + '/merge/index.html'),
+            output = render(__dirname + '/merge/output.html');
 
         expect(input).to.equal(output);
     });
@@ -86,8 +86,8 @@ describe('merge', function () {
 
 describe('annotations', function () {
     it('should handle annotations', function () {
-        var dom = compile(__dirname + '/annotations/index.html'),
-            out = compile(__dirname + '/annotations/output.html');
+        var dom = render(__dirname + '/annotations/index.html'),
+            out = render(__dirname + '/annotations/output.html');
 
         expect(dom).to.equal(out);
     });
@@ -227,8 +227,8 @@ describe('cssFind', function () {
 
 describe('find', function () {
     it('should handle find annotation', function () {
-        var dom = compile(__dirname + '/find/index.html'),
-            out = compile(__dirname + '/find/output.html');
+        var dom = render(__dirname + '/find/index.html'),
+            out = render(__dirname + '/find/output.html');
 
         expect(dom).to.equal(out);
     });
@@ -236,8 +236,8 @@ describe('find', function () {
 
 describe('complex', function () {
     it('should handle everything', function () {
-        var dom = compile(__dirname + '/complex/index.html'),
-            out = compile(__dirname + '/complex/output.html');
+        var dom = render(__dirname + '/complex/index.html'),
+            out = render(__dirname + '/complex/output.html');
 
         expect(dom).to.equal(out);
     });
