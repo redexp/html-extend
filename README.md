@@ -43,10 +43,36 @@ Extend origin html file using es6 like module system and annotations.
 
 ## API
 
-* `render({String} filePath) -> {HtmlString}` - takes path to html file and returns html string
-* `htmlFileToDom({String} filePath) -> {HtmlModule}` - takes path to html file and returns html module which is dom object of [simple-html-dom-parser](https://github.com/redexp/simple-html-dom-parser) with `imports` and `exports` properties
-* `htmlToDom({String} html, {String} filePath) -> {HtmlModule}` - takes html string and path to file (which is needed to resolve import paths) and returns html module
-* `domToHtml({HtmlDomObject} dom) -> {HtmlString}` - takes dom object and returns html string
+```javascript
+/**
+ * @param {String} filePath
+ * @returns {HtmlString}
+ */
+render(filePath)
+```
+```javascript
+/**
+ * @param {String} filePath
+ * @returns {HtmlModule}
+ */
+htmlFileToDom(filePath)
+```
+`{HtmlModule}` is dom object of [simple-html-dom-parser](https://github.com/redexp/simple-html-dom-parser) with `imports` and `exports` properties
+```javascript
+/**
+ * @param {String} html
+ * @param {String} filePath
+ * @returns {HtmlModule}
+ */
+htmlToDom(html, filePath)
+```
+```javascript
+/**
+ * @param {DomObject} dom
+ * @returns {String}
+ */
+domToHtml(dom)
+```
 
 ```javascript
 var render = require('html-extend').render;
