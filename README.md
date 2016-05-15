@@ -9,6 +9,13 @@ For example, you have some html file with `<table>` tag with rich markup and you
 ## My solution
 Extend origin html file using es6 like module system and annotations.
 
+## Install
+
+`npm install html-extend`
+
+## Contents
+
+* [API](#api)
 * [Annotations](#annotations)
 * [export](#export)
 * [import](#import)
@@ -32,6 +39,20 @@ Extend origin html file using es6 like module system and annotations.
 * [@insertAfter](#insertafter)
 * [Future features](#future-features)
 * [Contribute](#contribute)
+
+
+## API
+
+* `render({String} filePath) -> {HtmlString}` - takes path to html file and returns html string
+* `htmlFileToDom({String} filePath) -> {HtmlModule}` - takes path to html file and returns html module which is dom object of [simple-html-dom-parser](https://github.com/redexp/simple-html-dom-parser) with `imports` and `exports` properties
+* `htmlToDom({String} html, {String} filePath) -> {HtmlModule}` - takes html string and path to file (which is needed to resolve import paths) and returns html module
+* `domToHtml({HtmlDomObject} dom) -> {HtmlString}` - takes dom object and returns html string
+
+```javascript
+var render = require('html-extend').render;
+
+console.log(render('test/complex/index.html'));
+```
 
 
 ## Annotations
