@@ -1,61 +1,64 @@
 # html-extend
 
 
-## Задача
-У нас есть просто html файл, нам нужно создать на его основе новый, но с добавленными тегами в определённых местах.
+## Issue
+For example, you have some html file with `<table>` tag with rich markup and you need it in another file but without some buttons, different classes and labels, or even worse, you will need to wrap some tag. You can solve it with dozens of parameters and if's but you markup will become unreadable.
 
+## My solution
+Extend origin html file using es6 like module system and annotations.
 
-## Анотации
-Анотации вида `@anotationName` будут служить ключивыми структурами с помощью которых движок будет знать что делать с тегом. Анотацию нужно ставить непосредственно перед тегом.Любой текст, между анотацией и тегом, будет относиться к анотации.
-
-
-## Модульность
-Модули будут максимально приближёнными к модулям ES6. По аналогии с Node.js глобальные модули будут храниться в папке `html_modules`.
-
+## Annotations
+Annotations is text like `@anotationName` before tags which describe how tag should be modified.
 
 ## @export
-Что бы экспортнуть тег достаточно перед ним написать анотацию `@export TagAlias` где `TagAlias` - имя тега когда его будут импортировать. Если `TagAlias` будет равен `default` то этот тег можно будет импортировать как дефолтный. Анотация `@export` может нахоиться на любом уровне вложенности.
+Annotation which used to export tags. The only option is the name of exported tag. It's same as in CommonJS when you write `exports.TagName` or in es6 `export TagName` will be `@export TagName`. Also as in es6 `export default` you can write `@export default` or just `@export` and this tag will be default for current moule. You can export any tag from file, not just root tags.
 ```html
 @export default
-<div>
+<div class="layout">
   @export ButtonXS
   <button class="btn btn-xs">OK</button>
 </div>
 ```
 
-
 ## import
-Что бы импортнуть тег необходимо использовать слово `import` одним из следующих вариантов
+`import` is a keyword, not annotation, because it not binded to any tag, it should be only on top of file. Syntax is same as for es6.
 ```javascript
-import {TagAlias1, TagAlias2 as Item} from 'path/to/file1'
-import * as Bootstrap from 'path/to/file2'
-import Layout from 'path/to/file3'
+import {TagAlias1, TagAlias2 as Item} from './path/to/file1'
+import * as Bootstrap from './path/to/file2'
+import Layout from './path/to/file3'
 ```
-а потом создавать тег обычным способом
+Then you can use those tags.
 ```html
 <TagAlias1></TagAlias1>
 <Item/>
 <Bootstrap.ButtonXS></Bootstrap.ButtonXS>
 <Layout/>
 ```
-Из-за того что `import` не относится к конкретному тегу, потому он не является анотацией, а ключевым словом.
 
 
-## Указание пути к модифицируемому тегу
-Все теги, перед которыми нету анотаций и которые находятся внутри импортированного тега, будут восприняты как путь.
+## Path to tag
+You have two options to point on tag which you want to modify. 
+
+**First** is write same tags tree to tag.
 ```html
 @export Item
 <div>
   <ul class="list">
     <li class="item">
-      <span class="h2">Title</span>
+      <span class="h2">Title 1</span>
+    </li>
+    <li class="item">
+      <span class="h2">Title 2</span>
+    </li>
+    <li class="item">
+      <span class="h2">Title 3</span>
     </li>
   </ul>
 </div>
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   <ul>
@@ -69,8 +72,7 @@ import {Item} from 'module1'
   </ul>
 </Item>
 ```
-Этот путь можно представить в виде селектора `Item > *:nth-child(1) > *:nth-child(1)`
-Результат:
+ =
 ```html
 <div>
   <ul class="list">
@@ -80,7 +82,7 @@ import {Item} from 'module1'
   </ul>
 </div>
 ```
-Что бы не привязываться к имени тега можно использовать `<tag>`, например
+If you don't want or don't know tags names, simply write `<tag>`
 ```html
 <Item>
   <tag>
@@ -90,8 +92,7 @@ import {Item} from 'module1'
   </tag>
 </Item>
 ```
-Селектор будет `Item > *:nth-child(1) > *:nth-child(1)`
-Что бы указать третий тег в контейнере
+To point to third tag
 ```html
 <Item>
   <ul>
@@ -103,10 +104,11 @@ import {Item} from 'module1'
   </ul>
 </Item>
 ```
-Селектор будет `Item > *:nth-child(1) > *:nth-child(3)`
+**Second** is to use `@find`
 
-## Добавление тегов
-Если в родительском контейнере один тег, а в текущем два, то второй будет будет добавлен
+
+## Add tag
+If in parent tag only one child and you write two then secod will be added.
 ```html
 @export Item
 <div>
@@ -117,7 +119,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   <tag>
@@ -128,7 +130,6 @@ import {Item} from 'module1'
 ```
  =
 ```html
-@export Item
 <div>
   <ul class="list">
     <li class="item"></li>
@@ -136,15 +137,15 @@ import {Item} from 'module1'
   </ul>
 </div>
 ```
-Что бы добавить тег, без указания точного пути, есть аннотации: @prepend, @append, @insert
+Also annotations like `@prepend` and `@append` can add tags.
 
 
-## Удаление тегов
-Для этого надо использовать аннотацию @remove
+## Remove tag
+See `@remove`
 
 
-## Переименование тегов
-Указав путь к тегу, можно просто написать другое имя
+## Rename tag
+Just point to needed tag and write new name
 ```html
 @export Item
 <div>
@@ -155,7 +156,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   <tag>
@@ -165,7 +166,6 @@ import {Item} from 'module1'
 ```
  =
 ```html
-@export Item
 <div>
   <ul class="list">
     <div class="item"></li>
@@ -174,8 +174,8 @@ import {Item} from 'module1'
 ```
 
 
-## Добавление/переписывание атрибутов
-Любой указанный атрибут (кроме тега `class`) будет переписывать такой же родительский или если у родительского тега нету такого атрибута, то он добавиться
+## Add/rewrite attribute
+Any attribute (except `class`) will be rewrited if it not exist in parent, it will be added.
 ```html
 @export Item
 <div>
@@ -184,7 +184,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   <tag id="header" title="Header"/>
@@ -197,8 +197,8 @@ import {Item} from 'module1'
 </div>
 ```
 
-## Удаление атрибутов
-Что бы удалить атрибут перед ним нужно поставить `!`
+## Remove attribute
+To remove attribute just write `!` before it
 ```html
 @export Item
 <div>
@@ -207,7 +207,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   <h1 !title/>
@@ -220,8 +220,8 @@ import {Item} from 'module1'
 </div>
 ```
 
-## Добавление классов
-Любой указаный класс будет добавлен к текущему тегу
+## Add class
+All class names will be added (not rewrited) to parent tag.
 ```html
 @export Item
 <div>
@@ -230,7 +230,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   <h1 class="pull-left"/>
@@ -243,8 +243,8 @@ import {Item} from 'module1'
 </div>
 ```
 
-## Удаление классов
-Что бы удалить класс перед ним нужно поставить `!`
+## Remove class
+To remove class name write `!` before it
 ```html
 @export Item
 <div>
@@ -253,7 +253,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   <h1 class="!header"/>
@@ -267,8 +267,8 @@ import {Item} from 'module1'
 ```
 
 
-## Замена текста в теге
-Текст, перед которым нету анотации, будет заменять текущий текст в теге. На текст так же распостроняются правила построения пути.
+## Rewrite text in tag
+Any text will rewrite parent text.
 ```html
 @export Item
 <div>
@@ -281,7 +281,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   <h1><tag/> Main title</h1>
@@ -309,12 +309,12 @@ import {Item} from 'module1'
 ```
 
 
-## Удаление текста
-Удалить текст можно добавив символ мнемонику `&nbsp;` или если вообще без пробелов то можно `&ZeroWidthSpace;` или любой другой непечатаемы символ.
+## Remove text
+To remove text you need write some html entity like `&nbsp;` or if you no need space then `&ZeroWidthSpace;` or similar.
 
 
 ## @find
-С помощью этой анотации можно указать путь к тегу через селектор. Теги с этой анотацией будут участвовать в построении пути только внутри себя, для соседей их существовать не будет, так как они не будут относиться к текущему контейнеру.
+With this annotation you can point to tag with css selector.
 ```html
 @export Item
 <div>
@@ -330,7 +330,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   @find .header
@@ -348,26 +348,23 @@ import {Item} from 'module1'
   </tag>
 </Item>
 ```
-Путь к первому `@append` будет `Item .header`, ко второму `Item > *:nth-child(1) > *:nth-child(2)`. 
-Результат:
+ =
 ```html
 <div>
   <div class="wrapper">
     <div class="header">
       <h1>Title</h1>
-      <span>Sub title</span>
-    </div>
+    <span>Sub title</span></div>
     <div class="content">
       <p>Description</p>
-      <p>Text</p>
-    </div>
+    <p>Text</p></div>
   </div>
 </div>
 ```
 
 
 ## @append
-Добавляет тег в конец текущего контейнера.
+It will add tag to the end of current tag parent.
 ```html
 @export Item
 <div>
@@ -376,7 +373,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   @append
@@ -391,11 +388,11 @@ import {Item} from 'module1'
   <span>Title</span>
 <button>OK</button></div>
 ```
-Если вы хотите добавить несколько тего, то перед каждым нужно будет ставить `@append`.
+If you want to add several tags then you need to write `@append` before each of them.
 
 
 ## @prepend
-Добавляет тег в начало текущего контейнера.
+Will add tag on first place of current parent
 ```html
 @export Item
 <div>
@@ -404,7 +401,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   @prepend
@@ -422,7 +419,7 @@ import {Item} from 'module1'
 
 
 ## @insert
-Добавляет тег в текущую позицию текущего контейнера.
+Will add tag on current place.
 ```html
 @export Item
 <div>
@@ -437,12 +434,10 @@ import {Item} from 'module1'
 
 <Item>
   <h1/>
-  <tag/>
+  <p/>
   
   @insert
   <input type="text"/>
-  
-  <button type="submit"/>
 </Item>
 ```
  =
@@ -451,13 +446,13 @@ import {Item} from 'module1'
   <h1>Title</h1>
   <p>Description</p>
   <input type="text"/>
-  <button type="submit">OK</button>
+  <button>Ok</button>
 </div>
 ```
 
 
 ## @remove
-Удаляет текущий тег.
+Will remove current tag
 ```html
 @export Item
 <div>
@@ -469,14 +464,12 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   <tag class="content">
     @remove
     <input/>
-    
-    <button type="submit"/>
   </tag>
 </Item>
 ```
@@ -484,14 +477,14 @@ import {Item} from 'module1'
 ```html
 <div>
   <div class="content">
-    <button type="submit">OK</button>
+    <button>OK</button>
   </div>
 </div>
 ```
 
 
 ## @empty
-Удаляет всё содержимое текущего тега.
+Will remove children of current tag.
 ```html
 @export Item
 <div>
@@ -503,7 +496,7 @@ import {Item} from 'module1'
 ```
 +
 ```html
-import {Item} from 'module1'
+import {Item} from './module1'
 
 <Item>
   @empty
@@ -520,3 +513,132 @@ import {Item} from 'module1'
   </div>
 </div>
 ```
+
+
+## @appendTo
+Will add tag to another tag by css selector.
+```html
+@export Item
+<div>
+  <div class="content">
+    <p class="description">Description</p>
+  </div>
+</div>
+```
++
+```html
+import {Item} from './module1'
+
+<Item>
+  @appendTo .description
+  <span>Read more</span>
+</Item>
+```
+ =
+```html
+<div>
+  <div class="content">
+    <p class="description">Description<span>Read more</span></p>
+  </div>
+</div>
+```
+
+
+## @prependTo
+Will add tag to the beginig of another tag by css selector
+```html
+@export Item
+<div>
+  <div class="content">
+    <p class="description">Description</p>
+  </div>
+</div>
+```
++
+```html
+import {Item} from './module1'
+
+<Item>
+  @prependTo .content
+  <h1>Title</h1>
+</Item>
+```
+ =
+```html
+<div>
+  <div class="content"><h1>Title</h1>
+    <p class="description">Description</p>
+  </div>
+</div>
+```
+
+## @insertBefore
+Will add tag before another tag by css selector
+```html
+@export Item
+<div>
+  <div class="content">
+    <h1>Title</h1>
+    <p class="description">Description</p>
+  </div>
+</div>
+```
++
+```html
+import {Item} from './module1'
+
+<Item>
+  @insertBefore .description
+  <h2>Sub title</h2>
+</Item>
+```
+ =
+```html
+<div>
+  <div class="content">
+    <h1>Title</h1>
+    <h2>Sub title</h2><p class="description">Description</p>
+  </div>
+</div>
+```
+
+
+## @insertAfter
+Will add tag after another tag by css selector
+```html
+@export Item
+<div>
+  <div class="content">
+    <h1>Title</h1>
+    <p class="description">Description</p>
+  </div>
+</div>
+```
++
+```html
+import {Item} from './module1'
+
+<Item>
+  @insertAfter .content h1
+  <h2>Sub title</h2>
+</Item>
+```
+ =
+```html
+<div>
+  <div class="content">
+    <h1>Title</h1><h2>Sub title</h2>
+    <p class="description">Description</p>
+  </div>
+</div>
+```
+
+
+## Future features
+1. Folder `html_modules` just like `node_modules`
+2. Extensions to handle import of any file type like Jade or React
+ 
+
+## Contribute
+Help me improve this doc and any PR are welcome.
+
