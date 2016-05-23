@@ -1,12 +1,12 @@
 var chai = require('chai').use(require('chai-shallow-deep-equal')),
     expect = chai.expect;
 
-var htmFileToDom = require('../index').htmlFileToDom,
+var htmlFileToDom = require('../index').htmlFileToDom,
     render = require('../index').render;
 
 describe('imports', function () {
     it('should have imports', function () {
-        var dom = htmFileToDom(__dirname + '/imports/index.html');
+        var dom = htmlFileToDom(__dirname + '/imports/index.html');
 
         expect(dom.imports.Layout).to.deep.equal({
             name: 'default',
@@ -45,7 +45,7 @@ describe('imports', function () {
     });
 
     it('should have exports', function () {
-        var dom = htmFileToDom(__dirname + '/imports/helpers/index.html');
+        var dom = htmlFileToDom(__dirname + '/imports/helpers/index.html');
 
         expect(dom.exports.default).to.shallowDeepEqual({
             type: 'tag',
@@ -64,7 +64,7 @@ describe('imports', function () {
     });
 
     it('should not have shadow DOM', function () {
-        var dom = htmFileToDom(__dirname + '/imports/helpers/index.html');
+        var dom = htmlFileToDom(__dirname + '/imports/helpers/index.html');
 
         expect(dom.exports.Input).to.shallowDeepEqual({
             type: 'tag',
@@ -238,6 +238,65 @@ describe('complex', function () {
     it('should handle everything', function () {
         var dom = render(__dirname + '/complex/index.html'),
             out = render(__dirname + '/complex/output.html');
+
+        expect(dom).to.equal(out);
+    });
+});
+
+describe('extensions', function () {
+    var setExtension = require('../index').setExtension,
+        fs = require('fs');
+    
+    it('should handle extension as function', function () {
+        setExtension('xhtml', function (file) {
+            var html = fs.readFileSync(file).toString();
+
+            return {
+                "default": function (tag) {
+                    var result = html,
+                        data = tag.shadowAttr;
+
+                    for (var name in data) {
+                        if (!data.hasOwnProperty(name)) continue;
+
+                        result = result.replace(new RegExp(`\\{${name}}`, 'g'), data[name]);
+                    }
+
+                    return result;
+                }
+            };
+        });
+
+        var dom = render(__dirname + '/extensions/index.html'),
+            out = render(__dirname + '/extensions/output.html');
+
+        expect(dom).to.equal(out);
+    });
+    
+    it('should handle extension as string', function () {
+        setExtension('xhtml', function (file) {
+            return {
+                "default": fs.readFileSync(file).toString()
+            };
+        });
+
+        var dom = render(__dirname + '/extensions/index.html'),
+            out = render(__dirname + '/extensions/output.html');
+
+        expect(dom).to.equal(out);
+    });
+    
+    it('should handle extension as dom object', function () {
+        setExtension('xhtml', function (file) {
+            var dom = htmlFileToDom(file);
+
+            return {
+                "default": dom.children[0]
+            };
+        });
+
+        var dom = render(__dirname + '/extensions/index.html'),
+            out = render(__dirname + '/extensions/output.html');
 
         expect(dom).to.equal(out);
     });

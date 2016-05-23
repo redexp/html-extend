@@ -3,20 +3,12 @@ var parser = require('simple-html-dom-parser').parse,
     get = require('simple-object-query').get,
     clone = require('./clone'),
     cssFind = require('./css-find'),
+    requireModule = require('./require-module'),
     fs = require('fs'),
     util = require('util'),
     pt = require('path');
 
 module.exports = htmlToDom;
-
-/**
- * @typedef {Object} HtmlModule
- * @property {Object} imports - Hash of imported tags
- * @property {Object} exports - Hash of exported tags
- * @property {Array} children
- */
-
-var modules = {};
 
 /**
  * @param {String} html
@@ -30,7 +22,7 @@ function htmlToDom(html, filePath) {
 
     var dom = parser(html, {
         regex: {
-            attribute: /[!\w][\w:\-\.]*/
+            attribute: /[!~\w][\w:\-\.]*/
         }
     });
     
@@ -103,26 +95,68 @@ function htmlToDom(html, filePath) {
             text.annotations.push(annotation);
         });
     });
-
+    
     // shadow dom
 
     find(dom, {type: 'tag'}, function (item) {
         var tag = item.target,
             parent = dom.imports[tag.name];
+        
+        tag.shadowAttr = {};
+        
+        for (var name in tag.attr) {
+            if (!tag.attr.hasOwnProperty(name) || name.charAt(0) !== '~') continue;
+            
+            var value = tag.attr[name];
+            
+            delete tag.attr[name];
+            
+            name = name.slice(1);
+
+            tag.shadowAttr[name] = value;
+        }
 
         if (!parent) return;
-
-        if (!parent.path) {
-            log(parent);
-        }
 
         var parentModule = requireModule(parent.path);
 
         if (!parentModule[parent.name]) {
             throw new Error('Undefined import module ' + parent.name);
         }
+        
+        var shadowDom = parentModule[parent.name];
+        
+        switch (typeof shadowDom) {
+        case 'object':
+            // ok
+            break;
 
-        tag.shadowDom = clone(parentModule[parent.name]);
+        case 'string':
+            shadowDom = htmlToFirstTag(shadowDom, parent.path);
+            break;
+            
+        case 'function':
+            shadowDom = shadowDom(tag);
+            
+            switch (typeof shadowDom) {
+            case 'object':
+                // ok
+                break;
+            
+            case 'string':
+                shadowDom = htmlToFirstTag(shadowDom, parent.path);
+                break;
+            
+            default: 
+                throw new Error('Extension tag handler should return string or dom object');
+            }
+            break;
+
+        default:
+            throw new Error('Unknown type of tag');
+        }
+
+        tag.shadowDom = clone(shadowDom);
     });
     
     // compile
@@ -390,39 +424,6 @@ function getAnnotationsFromText(text, cb) {
 
         return '';
     });
-}
-
-function requireModule(file) {
-    file = file.replace(/\.html?$/, '');
-
-    if (!modules[file]) {
-        var ext = null;
-
-        ['.html', '.htm', '/index.html', '/index.htm'].some(function (end) {
-            if (fileExist(file + end)) {
-                ext = end;
-                return true;
-            }
-        });
-
-        if (!ext) {
-            throw new Error('File "'+ file +'" not exists or not readable')
-        }
-
-        modules[file] = htmlToDom(fs.readFileSync(file + ext).toString(), file + ext).exports;
-    }
-
-    return modules[file];
-}
-
-function fileExist(file) {
-    try {
-        fs.accessSync(file, fs.R_OK);
-        return true;
-    }
-    catch (e) {
-        return false;
-    }
 }
 
 function isObject(val) {
@@ -721,4 +722,9 @@ function flatClone(node) {
     });
 
     return node;
+}
+
+function htmlToFirstTag(html, file) {
+    html = htmlToDom(html, file);
+    return html.children[0].type === 'tag' ? html.children[0] : html.children[1];
 }

@@ -73,16 +73,63 @@ htmlToDom(html, filePath)
  */
 domToHtml(dom)
 ```
-
 ```javascript
-var render = require('html-extend').render;
-
-console.log(render('test/complex/index.html'));
+/**
+ * @param {Array<String>|String} fileExtensions
+ * @param {Function} handler
+ */
+function setExtension(fileExtensions, handler)
 ```
+`handler` will take file path and should return hash with exported tag names, which values should be or html string or ready dom object or function which will take dom object and should return string or new dom object.
+
+Example
+
+`component.xhtml`
+```html
+<div>
+    <h1>{label}</h1>
+    <input type="{type}"/>
+</div>
+```
+```javascript
+var setExtension = require('html-extend').setExtension;
+
+setExtension('xhtml', function handler(file) {
+    var html = fs.readFileSync(file).toString();
+
+    return {
+        "default": function (tag) {
+            var result = html;
+
+            for (var name in tag.shadowAttr) {
+                result = result.replace('{' + name + '}', tag.shadowAttr[name]);
+            }
+
+            return result;
+        }
+    };
+});
+```
+```html
+import Component from './component'
+
+<div>
+    <Component ~label="Some Title" ~type="number" class="test"/>
+</div>
+```
+```html
+<div>
+    <div class="test">
+        <h1>Some Title</h1>
+        <input type="number"/>
+    </div>
+</div>
+```
+With `setExtension` you can even rewrite default `html` extension handler.
 
 
 ## Annotations
-Annotations is text like `@anotationName` before tags which describe how tag should be modified.
+Annotations is text like `@annotationName` before tags which describe how tag should be modified.
 
 ## @export
 Annotation which used to export tags. The only option is the name of exported tag. It's same as in CommonJS when you write `exports.TagName` or in es6 `export TagName` will be `@export TagName`. Also as in es6 `export default` you can write `@export default` or just `@export` and this tag will be default for current moule. You can export any tag from file, not just root tags.
@@ -182,7 +229,7 @@ To point to third tag
 
 
 ## Add tag
-If in parent tag only one child and you write two then secod will be added.
+If in parent tag only one child and you write two then second will be added.
 ```html
 @export Item
 <div>
@@ -293,6 +340,9 @@ import {Item} from './module1'
   <h1>Title</h1>
 </div>
 ```
+
+## Shadow attribute
+When attribute name starts with `~` it means it's shadow attribute and it needed only to pass some value to extended module. This type of attribute will not add, remove or rewrite parent attribute. See example of **setExtension** function.
 
 ## Add class
 All class names will be added (not rewrited) to parent tag.
@@ -710,7 +760,6 @@ import {Item} from './module1'
 
 ## Future features
 1. Folder `html_modules` just like `node_modules`
-2. Extensions to handle import of any file type like Jade or React
 3. Global tags for case when you don't want to import every time `Button` from bootstrap.
  
 
