@@ -25,6 +25,7 @@ Extend origin html file using es6 like module system and annotations.
 * [Rename tag](#rename-tag)
 * [Add/rewrite attribute](#addrewrite-attribute)
 * [Remove attribute](#remove-attribute)
+* [Shadow attribute](#shadow-attribute)
 * [Add class](#add-class)
 * [Rewrite text in tag](#rewrite-text-in-tag)
 * [Remove text](#remove-text)
