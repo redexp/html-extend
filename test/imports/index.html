@@ -1,7 +1,9 @@
-import Layout, {Footer as TestFooter} from './layout'
+import Layout, {Wrapper, Footer as TestFooter} from './layout'
 import * as Helpers, {Button} from './helpers'
+import './layout' as Main
+import './globals'
 import Module1 from 'module1'
 import Module2 from 'module2'
 import Module3 from 'module3'
 
-<Module1/><Module2/><Module3/>
+<Layout/><Wrapper/><TestFooter/><Helpers.Input/><Button/><Main/><GlobalTag1/><Global.Tag2/><Module1/><Module2/><Module3/>

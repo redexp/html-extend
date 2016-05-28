@@ -16,8 +16,15 @@ Extend origin html file using es6 like module system and annotations.
 ## Contents
 
 * [API](#api)
+  * [render](#render)
+  * [htmlFileToDom](#htmlfiletodom)
+  * [htmlToDom](#htmltodom)
+  * [domToHtml](#domtohtml)
+  * [globalTags](#globaltags)
+  * [setExtension](#setextension)
 * [Annotations](#annotations)
 * [export](#export)
+* [global](#global)
 * [import](#import)
 * Tags
   * [Path to tag](#path-to-tag)
@@ -43,12 +50,11 @@ Extend origin html file using es6 like module system and annotations.
   * [@prependTo](#prependto)
   * [@insertBefore](#insertbefore)
   * [@insertAfter](#insertafter)
-* [Future features](#future-features)
 * [Contribute](#contribute)
 
 
 ## API
-
+<a name="render"></a>
 ```javascript
 /**
  * @param {String} filePath
@@ -56,6 +62,7 @@ Extend origin html file using es6 like module system and annotations.
  */
 render(filePath)
 ```
+<a name="htmlfiletodom"></a>
 ```javascript
 /**
  * @param {String} filePath
@@ -64,6 +71,7 @@ render(filePath)
 htmlFileToDom(filePath)
 ```
 `{HtmlModule}` is dom object of [simple-html-dom-parser](https://github.com/redexp/simple-html-dom-parser) with `imports` and `exports` properties
+<a name="htmltodom"></a>
 ```javascript
 /**
  * @param {String} html
@@ -72,6 +80,7 @@ htmlFileToDom(filePath)
  */
 htmlToDom(html, filePath)
 ```
+<a name="domtohtml"></a>
 ```javascript
 /**
  * @param {DomObject} dom
@@ -79,6 +88,15 @@ htmlToDom(html, filePath)
  */
 domToHtml(dom)
 ```
+<a name="globaltags"></a>
+```javascript
+/**
+ * @property {Object}
+ */
+require('html-extend').globalTags
+```
+It's hash where keys are names of global tags and values should be `DomObject` or html string or function (which will take `DomObject` and should return string or new `DomObject`).
+<a name="setextension"></a>
 ```javascript
 /**
  * @param {Array<String>|String} fileExtensions
@@ -86,7 +104,7 @@ domToHtml(dom)
  */
 function setExtension(fileExtensions, handler)
 ```
-`handler` will take file path and should return hash with exported tag names, which values should be or html string or ready dom object or function which will take dom object and should return string or new dom object.
+`handler` will take file path and should return hash with exported tag names, which values should be `DomObject` or html string or function (which will take `DomObject` and should return string or new `DomObject`).
 
 Example
 
@@ -143,14 +161,24 @@ setExtension('xhtml', null);
 Annotations is text like `@annotationName` before tags which describe how tag should be modified.
 
 ## @export
-Annotation which used to export tags. The only option is the name of exported tag. It's same as in CommonJS when you write `exports.TagName` or in es6 `export TagName` will be `@export TagName`. Also as in es6 `export default` you can write `@export default` or just `@export` and this tag will be default for current moule. You can export any tag from file, not just root tags.
+Annotation which used to export tags. The only option is the name of exported tag. It's same as in CommonJS when you write `exports.TagName` or in es6 `export TagName` will be `@export TagName`. Also as in es6 `export default` you can write `@export default` or just `@export` and this tag will be default for current module. You can export any tag from file, not just root tags. You can use dots and dashes in tag name. You can use as many export names as you wish.
 ```html
 @export default
+@export Layout
 <div class="layout">
   @export ButtonXS
   <button class="btn btn-xs">OK</button>
+  @export Button.SM
+  <button class="btn btn-sm">OK</button>
+  @export btn-lg
+  @export Btn.lg
+  @export Bootstrap.btn-lg
+  <button class="btn btn-lg">OK</button>
 </div>
 ```
+
+## @global
+This annotation same as `@export` only it will export to global scope
 
 ## import
 `import` is a keyword, not annotation, because it's not binded to any tag, it should be only on top of file or after `<!DOCTYPE ...>`. Syntax is same as for es6.
@@ -769,10 +797,6 @@ import {Item} from './module1'
 </div>
 ```
 
-
-## Future features
-1. Global tags for case when you don't want to import every time `Button` from bootstrap.
- 
 
 ## Contribute
 Help me improve this doc and any comments are welcome in issues.

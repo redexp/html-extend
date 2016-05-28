@@ -16,6 +16,13 @@ describe('imports', function () {
             path: './layout'
         });
 
+        expect(dom.imports.Wrapper).to.deep.equal({
+            name: 'Wrapper',
+            alias: null,
+            type: 'tag',
+            path: './layout'
+        });
+
         expect(dom.imports.TestFooter).to.deep.equal({
             name: 'Footer',
             alias: 'TestFooter',
@@ -44,6 +51,36 @@ describe('imports', function () {
             path: './helpers'
         });
 
+        expect(dom.imports['Main']).to.deep.equal({
+            name: 'default',
+            alias: 'Main',
+            type: 'tag',
+            path: './layout'
+        });
+
+        expect(dom.imports).to.not.have.property('Footer');
+        expect(dom.imports).to.not.have.property('GlobalTag1');
+        expect(dom.imports).to.not.have.property('Global.Tag2');
+
+        var g = require('../index').globalTags;
+
+        expect(g).to.have.property('GlobalTag1');
+        expect(g).to.have.property('Global.Tag2');
+
+        expect(g['GlobalTag1']).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'global-1'
+            }
+        });
+
+        expect(g['Global.Tag2']).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'global-2'
+            }
+        });
+
         expect(dom.imports['Module1']).to.deep.equal({
             name: 'default',
             alias: 'Module1',
@@ -68,18 +105,74 @@ describe('imports', function () {
         expect(dom.children[1]).to.shallowDeepEqual({
             type: 'tag',
             attr: {
-                'class': 'module1'
+                'class': 'wrapper'
             }
         });
 
         expect(dom.children[2]).to.shallowDeepEqual({
             type: 'tag',
             attr: {
-                'class': 'module2'
+                'class': 'wrapper'
             }
         });
 
         expect(dom.children[3]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'footer'
+            }
+        });
+
+        expect(dom.children[4]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'type': 'text'
+            }
+        });
+
+        expect(dom.children[5]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'type': 'button'
+            }
+        });
+
+        expect(dom.children[6]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'wrapper'
+            }
+        });
+
+        expect(dom.children[7]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'global-1'
+            }
+        });
+
+        expect(dom.children[8]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'global-2'
+            }
+        });
+
+        expect(dom.children[9]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'module1'
+            }
+        });
+
+        expect(dom.children[10]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'module2'
+            }
+        });
+
+        expect(dom.children[11]).to.shallowDeepEqual({
             type: 'tag',
             attr: {
                 'class': 'module3'

@@ -4,6 +4,7 @@ var parser = require('simple-html-dom-parser').parse,
     clone = require('./clone'),
     cssFind = require('./css-find'),
     requireModule = require('./require-module'),
+    globalTags = require('./global-tags'),
     fs = require('fs'),
     util = require('util'),
     pt = require('path');
@@ -71,6 +72,10 @@ function htmlToDom(html, filePath) {
                     type: 'tag'
                 };
                 break;
+            
+            case 'anonymous':
+                requireModule(item.path, fileDir);
+                break;
 
             default:
                 dom.imports[importName] = item;
@@ -97,8 +102,9 @@ function htmlToDom(html, filePath) {
     // shadow dom
 
     find(dom, {type: 'tag'}, function (item) {
-        var tag = item.target,
-            parent = dom.imports[tag.name];
+        var tag = item.target;
+
+        if (!dom.imports[tag.name] && !globalTags[tag.name]) return;
         
         tag.shadowAttr = {};
         
@@ -114,15 +120,16 @@ function htmlToDom(html, filePath) {
             tag.shadowAttr[name] = value;
         }
 
-        if (!parent) return;
+        var shadowDom;
 
-        var parentModule = requireModule(parent.path, fileDir);
+        if (dom.imports[tag.name]) {
+            var parent = dom.imports[tag.name];
 
-        if (!parentModule[parent.name]) {
-            throw new Error('Undefined import module ' + parent.name);
+            shadowDom = requireModule(parent.path, fileDir)[parent.name];
         }
-        
-        var shadowDom = parentModule[parent.name];
+        else {
+            shadowDom = globalTags[tag.name];
+        }
         
         switch (typeof shadowDom) {
         case 'object':
@@ -149,6 +156,9 @@ function htmlToDom(html, filePath) {
                 throw new Error('Extension tag handler should return string or dom object');
             }
             break;
+
+        case 'undefined':
+            throw new Error('Undefined import tag ' + tag.name);
 
         default:
             throw new Error('Unknown type of tag');
@@ -181,9 +191,22 @@ function htmlToDom(html, filePath) {
         var text = item.target;
 
         text.annotations.forEach(function (annotation) {
-            if (annotation.name !== 'export') return;
+            switch (annotation.name) {
 
-            dom.exports[annotation.value.trim() || 'default'] = text.next;
+            case 'export':
+                dom.exports[annotation.value.trim() || 'default'] = text.next;
+                break;
+
+            case 'global':
+                var name = annotation.value.trim();
+
+                if (!name) {
+                    throw new Error('Name for global tag is required');
+                }
+
+                globalTags[name] = text.next;
+                break;
+            }
         });
     });
     
@@ -369,48 +392,60 @@ function find(dom, query, cb) {
 }
 
 function getImportsFromText(text, cb) {
-    return text.replace(/^ *import\s+(.+)\s+from\s+["'](.+)["'] *(\r\n|\n)?/gm, function (x, items, path) {
-        items
-            .replace(/\{([^}]+)}/, function (x, items) {
-                items
-                    .split(/\s*,\s*/)
-                    .forEach(function (tag) {
-                        var name = tag.match(/^[\w\-]+/)[0],
-                            alias = tag.match(/as\s+([\w\-]+)$/);
+    return text
+        .replace(/^ *import +["'](.+)["'] *(as +[\w\.\-]+)? *(?:\r\n|\n)?/gm, function (x, path, alias) {
+            alias = alias && alias.replace(/^as +/, '');
 
-                        if (alias) alias = alias[1];
+            cb({
+                alias: alias,
+                type: alias ? 'default' : 'anonymous',
+                path: path
+            });
 
-                        cb({
-                            name: name,
-                            alias: alias,
-                            path: path,
-                            type: 'tag'
-                        });
-                    })
-                ;
+            return '';
+        })
+        .replace(/^ *import +(.+) +from +["'](.+)["'] *(?:\r\n|\n)?/gm, function (x, items, path) {
+            items
+                .replace(/\{([^}]+)}/, function (x, items) {
+                    items
+                        .split(/\s*,\s*/)
+                        .forEach(function (tag) {
+                            var name = tag.match(/^[\w\.\-]+/)[0],
+                                alias = tag.match(/as\s+([\w\.\-]+)$/);
 
-                return '';
-            })
-            .split(/\s*,\s*/)
-            .forEach(function (tag) {
-                if (!tag) return;
+                            if (alias) alias = alias[1];
 
-                var name = tag.match(/^[\w\-\*]+/)[0],
-                    alias = tag.match(/as\s+([\w\-]+)$/);
+                            cb({
+                                name: name,
+                                alias: alias,
+                                path: path,
+                                type: 'tag'
+                            });
+                        })
+                    ;
 
-                if (alias) alias = alias[1];
+                    return '';
+                })
+                .split(/\s*,\s*/)
+                .forEach(function (tag) {
+                    if (!tag) return;
 
-                cb({
-                    name: name,
-                    alias: alias,
-                    path: path,
-                    type: name === '*' ? 'module' : 'default'
-                });
-            })
-        ;
+                    var name = tag.match(/^(?:\*|[\w\.\-]+)/)[0],
+                        alias = tag.match(/as\s+([\w\.\-]+)$/);
 
-        return '';
-    });
+                    if (alias) alias = alias[1];
+
+                    cb({
+                        name: name,
+                        alias: alias,
+                        path: path,
+                        type: name === '*' ? 'module' : 'default'
+                    });
+                })
+            ;
+
+            return '';
+        });
 }
 
 function getAnnotationsFromText(text, cb) {
