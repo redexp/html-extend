@@ -20,6 +20,8 @@ function htmlToDom(html, filePath) {
         throw new Error('File path is required');
     }
 
+    var fileDir = pt.dirname(filePath);
+
     var dom = parser(html, {
         regex: {
             attribute: /[!~\w][\w:\-\.]*/
@@ -40,18 +42,14 @@ function htmlToDom(html, filePath) {
                         dom.children[1] : null;
 
     if (importsText) {
-        var dir = pt.dirname(filePath);
-
         importsText.data = getImportsFromText(importsText.data, function (item) {
-            item.path = pt.join(dir, item.path);
-
             var importName = item.alias || item.name;
 
             switch (item.type) {
             case 'module':
                 importName = importName === '*' ? '' : importName + '.';
 
-                var exports = requireModule(item.path);
+                var exports = requireModule(item.path, fileDir);
 
                 for (var name in exports) {
                     if (!exports.hasOwnProperty(name)) continue;
@@ -118,7 +116,7 @@ function htmlToDom(html, filePath) {
 
         if (!parent) return;
 
-        var parentModule = requireModule(parent.path);
+        var parentModule = requireModule(parent.path, fileDir);
 
         if (!parentModule[parent.name]) {
             throw new Error('Undefined import module ' + parent.name);

@@ -1,4 +1,5 @@
-var fs = require('fs');
+var resolve = require('resolve'),
+    pt = require('path');
 
 /**
  * @typedef {Object} HtmlModule
@@ -8,39 +9,26 @@ var fs = require('fs');
  */
 
 var modules = {},
-    extensions = {};
+    extensions = {},
+    extensionsList = [];
 
 requireModule.modules = modules;
-requireModule.extensions = extensions;
 requireModule.setExtension = setExtension;
 
 module.exports = requireModule;
 
-function requireModule(path) {
-    if (modules[path]) return modules[path];
+function requireModule(path, baseDir) {
+    var realPath = resolve.sync(path, {
+        basedir: baseDir,
+        extensions: extensionsList
+    });
 
-    var realPath = path;
-    
-    if (isDir(realPath)) {
-        realPath += '/index';
-    }
-    
-    var cb;
+    if (modules[realPath]) return modules[realPath];
 
-    for (var ext in extensions) {
-        if (!extensions.hasOwnProperty(ext) || !fileExist(realPath + '.' + ext)) continue;
-
+    var ext = pt.extname(realPath),
         cb = extensions[ext];
-        break;
-    }
 
-    if (!cb) {
-        throw new Error(`Unknown file type ${realPath}`)
-    }
-
-    modules[path] = cb(realPath + '.' + ext);
-
-    return modules[path];
+    return modules[realPath] = cb(realPath);
 }
 
 /**
@@ -52,26 +40,16 @@ function setExtension(fileExtensions, handler) {
         fileExtensions = [fileExtensions];
     }
 
-    fileExtensions.forEach(function (rule) {
-        extensions[rule] = handler;
+    fileExtensions.forEach(function (ext) {
+        ext = '.' + ext;
+
+        if (!handler && extensions[ext]) {
+            delete extensions[ext];
+        }
+        else {
+            extensions[ext] = handler;
+        }
     });
-}
 
-function fileExist(file) {
-    try {
-        fs.accessSync(file, fs.R_OK);
-        return true;
-    }
-    catch (e) {
-        return false;
-    }
-}
-
-function isDir(file) {
-    try {
-        return fs.statSync(file).isDirectory();
-    }
-    catch (e) {
-        return false;
-    }
+    extensionsList = Object.keys(extensions);
 }

@@ -1,5 +1,6 @@
 var chai = require('chai').use(require('chai-shallow-deep-equal')),
-    expect = chai.expect;
+    expect = chai.expect,
+    pt = require('path');
 
 var htmlFileToDom = require('../index').htmlFileToDom,
     render = require('../index').render;
@@ -12,35 +13,77 @@ describe('imports', function () {
             name: 'default',
             alias: 'Layout',
             type: 'tag',
-            path: __dirname + '/imports/layout'
+            path: './layout'
         });
 
         expect(dom.imports.TestFooter).to.deep.equal({
             name: 'Footer',
             alias: 'TestFooter',
             type: 'tag',
-            path: __dirname + '/imports/layout'
+            path: './layout'
         });
 
         expect(dom.imports['Helpers.Input']).to.deep.equal({
             name: 'Input',
             alias: 'Helpers.Input',
             type: 'tag',
-            path: __dirname + '/imports/helpers'
+            path: './helpers'
         });
 
         expect(dom.imports['Helpers.Button']).to.deep.equal({
             name: 'Button',
             alias: 'Helpers.Button',
             type: 'tag',
-            path: __dirname + '/imports/helpers'
+            path: './helpers'
         });
 
         expect(dom.imports['Button']).to.deep.equal({
             name: 'Button',
             alias: null,
             type: 'tag',
-            path: __dirname + '/imports/helpers'
+            path: './helpers'
+        });
+
+        expect(dom.imports['Module1']).to.deep.equal({
+            name: 'default',
+            alias: 'Module1',
+            type: 'tag',
+            path: 'module1'
+        });
+
+        expect(dom.imports['Module2']).to.deep.equal({
+            name: 'default',
+            alias: 'Module2',
+            type: 'tag',
+            path: 'module2'
+        });
+
+        expect(dom.imports['Module3']).to.deep.equal({
+            name: 'default',
+            alias: 'Module3',
+            type: 'tag',
+            path: 'module3'
+        });
+
+        expect(dom.children[1]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'module1'
+            }
+        });
+
+        expect(dom.children[2]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'module2'
+            }
+        });
+
+        expect(dom.children[3]).to.shallowDeepEqual({
+            type: 'tag',
+            attr: {
+                'class': 'module3'
+            }
         });
     });
 

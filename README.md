@@ -67,7 +67,7 @@ htmlFileToDom(filePath)
 ```javascript
 /**
  * @param {String} html
- * @param {String} filePath
+ * @param {String} filePath - needed to resolve import path
  * @returns {HtmlModule}
  */
 htmlToDom(html, filePath)
@@ -133,6 +133,11 @@ import Component from './component'
 ```
 With `setExtension` you can even rewrite default `html` extension handler.
 
+To remove extension just set `null`
+```javascript
+setExtension('xhtml', null);
+```
+
 
 ## Annotations
 Annotations is text like `@annotationName` before tags which describe how tag should be modified.
@@ -148,19 +153,20 @@ Annotation which used to export tags. The only option is the name of exported ta
 ```
 
 ## import
-`import` is a keyword, not annotation, because it not binded to any tag, it should be only on top of file. Syntax is same as for es6.
+`import` is a keyword, not annotation, because it's not binded to any tag, it should be only on top of file or after `<!DOCTYPE ...>`. Syntax is same as for es6.
 ```javascript
-import {TagAlias1, TagAlias2 as Item} from './path/to/file1'
-import * as Bootstrap from './path/to/file2'
-import Layout from './path/to/file3'
+import {TagAlias1, TagAlias2 as Item} from './path/to/file'
+import Layout from '/absolute/path/to/file'
+import * as Bootstrap from 'name-of-npm-package'
 ```
 Then you can use those tags.
 ```html
 <TagAlias1></TagAlias1>
 <Item/>
-<Bootstrap.ButtonXS></Bootstrap.ButtonXS>
 <Layout/>
+<Bootstrap.ButtonXS></Bootstrap.ButtonXS>
 ```
+As you can see you can share your html modules through npm and `import` will find it just like native `require()`.
 
 
 ## Path to tag
@@ -765,8 +771,7 @@ import {Item} from './module1'
 
 
 ## Future features
-1. Folder `html_modules` just like `node_modules`
-3. Global tags for case when you don't want to import every time `Button` from bootstrap.
+1. Global tags for case when you don't want to import every time `Button` from bootstrap.
  
 
 ## Contribute
