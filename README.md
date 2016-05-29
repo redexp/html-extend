@@ -158,7 +158,8 @@ setExtension('xhtml', null);
 
 
 ## Annotations
-Annotations is text like `@annotationName` before tags which describe how tag should be modified.
+Annotations is text or comment like `@annotationName` before tags which describes how tag should be modified.
+
 
 ## @export
 Annotation which used to export tags. The only option is the name of exported tag. It's same as in CommonJS when you write `exports.TagName` or in es6 `export TagName` will be `@export TagName`. Also as in es6 `export default` you can write `@export default` or just `@export` and this tag will be default for current module. You can export any tag from file, not just root tags. You can use dots and dashes in tag name. You can use as many export names as you wish.
@@ -168,11 +169,13 @@ Annotation which used to export tags. The only option is the name of exported ta
 <div class="layout">
   @export ButtonXS
   <button class="btn btn-xs">OK</button>
-  @export Button.SM
+  <!-- @export Button.SM -->
   <button class="btn btn-sm">OK</button>
-  @export btn-lg
-  @export Btn.lg
-  @export Bootstrap.btn-lg
+  <!--
+   | @export btn-lg
+   | @export Btn.lg
+   | @export Bootstrap.btn-lg
+   +-->
   <button class="btn btn-lg">OK</button>
 </div>
 ```

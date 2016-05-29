@@ -29,10 +29,6 @@ function htmlToDom(html, filePath) {
         }
     });
     
-    // comments
-
-    removeComments(dom);
-
     // imports
 
     dom.imports = {};
@@ -83,12 +79,41 @@ function htmlToDom(html, filePath) {
         });
     }
 
+    // comments
+
+    find(dom, {type: 'comment'}, function (item) {
+        var comment = item.target,
+            text = comment.next;
+
+        if (!text || text.type !== 'text') {
+            text = createText();
+            insertAfter(comment, text);
+        }
+
+        text.annotations = [];
+
+        getAnnotationsFromText(comment.data, function (annotation) {
+            text.annotations.push(annotation);
+        });
+
+        if (text.annotations.length > 0 && (!text.next || text.next.type !== 'tag')) {
+            throw new Error('After annotations should be a tag');
+        }
+
+        if (comment.prev && comment.prev.type === 'text') {
+            text.data = comment.prev.data + text.data;
+            remove(comment.prev);
+        }
+
+        remove(comment);
+    });
+
     // annotations
 
     find(dom, {type: 'text'}, function (item) {
         var text = item.target;
 
-        text.annotations = [];
+        text.annotations = text.annotations || [];
 
         text.data = getAnnotationsFromText(text.data, function (annotation) {
             if (!text.next || text.next.type !== 'tag') {
@@ -359,24 +384,6 @@ function compileShadowDom(node) {
     });
 }
 
-function removeComments(root) {
-    find(root, {type: 'comment'}, function (item) {
-        var comment = item.target;
-
-        if (
-            comment.prev &&
-            comment.prev.type === 'text' &&
-            comment.next &&
-            comment.next.type === 'text'
-        ) {
-            comment.prev.data += comment.next.data;
-            remove(comment.next);
-        }
-
-        remove(comment);
-    });
-}
-
 function find(dom, query, cb) {
     return search({
         source: dom,
@@ -449,7 +456,7 @@ function getImportsFromText(text, cb) {
 }
 
 function getAnnotationsFromText(text, cb) {
-    return text.replace(/^ *@([\w\-]+) *(.*)(\r\n|\n)?/gm, function (x, name, value) {
+    return text.replace(/^ *\|? *@([\w\-]+) *(.*)(\r\n|\n)?/gm, function (x, name, value) {
         cb({
             name: name,
             value: value
